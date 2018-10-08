@@ -1,4 +1,7 @@
 <?php
+
+ini_set('memory_limit', '-1');
+
 function showTemplates(){
     $key = 'f148bd717568fe2b2c8fbeec44c44b91';
     $userId = '280465';
@@ -18,7 +21,7 @@ function showTemplates(){
     
     $result = json_decode($resp, $assoc = true);
     
-    //var_dump($result["pdf_manager_templates"]);
+    var_dump($result["pdf_manager_templates"]);
     
     foreach($result["pdf_manager_templates"] as $template){
        initRun($template["id"]);
@@ -29,7 +32,7 @@ function showTemplates(){
 function initRun($id){
     $key = 'f148bd717568fe2b2c8fbeec44c44b91';
     $userId = '280465';
-    $callback = 'https://webadmit-app-cloudmineconsulting.c9users.io/webadmit_webhook_listener.php';
+    $callback = 'https://mighty-cliffs-70333.herokuapp.com/webadmit_webhook_listener.php';
     
     $data = array("pdf_manager_template_id" => $id, "callback" => $callback);
     $data_string = json_encode($data);
@@ -52,12 +55,12 @@ function initRun($id){
     curl_close($curl);
     
     $result = json_decode($resp, $assoc = true);
-    
+
     var_dump($result);
     
     return $result;   
 }
 
 showTemplates();
-
+echo "DONE";
 ?>

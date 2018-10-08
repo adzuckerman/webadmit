@@ -1,4 +1,6 @@
 <?php
+ini_set('memory_limit', '-1');
+
 //Get callback from WebAdmit
 $key = 'f148bd717568fe2b2c8fbeec44c44b91';
 $userId = '280465';
@@ -47,7 +49,7 @@ foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
     
     fwrite($fp, $content);
     fclose($fp);
-    
+
     //unzip file
     $zip = new ZipArchive;
     $res = $zip->open($output_filename);

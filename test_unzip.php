@@ -13,7 +13,7 @@
     $blobArray = array();
     
     //Iterate through files in the extract path
-    $dir = dirname(__FILE__).'/myzips/extractpath1/*';//'/home/ubuntu/workspace/myzips/extractpath1/*';
+    $dir = dirname(__FILE__).'/myzips/extractpath1/*';
     $dirNoStar = str_replace('*','',$dir);
     
     foreach(glob($dir) as $file) {
@@ -21,7 +21,6 @@
       $casId = substr($casId,0,strpos($casId, '_'));
       $casIdtoFile[$casId] = $file; 
       $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
-      //$blobArray = array_push($blobArray,base64_encode(file_get_contents($file)))
     }
     
     //Create CAS Id set for query string
@@ -30,8 +29,8 @@
     
     //Create connection to Salesforce.com instance
     define("USERNAME", "azuckermanre@usa.edu.redev");
-    define("PASSWORD", "Ek.Zuck0883!");
-    define("SECURITY_TOKEN", "FxVjMyqbPFcYhsEywRelZ4zE");
+    define("PASSWORD", "OmnivoFall2018!");
+    define("SECURITY_TOKEN", "33u454gypb0g8K0bgm33s45W");
     
     require_once ('soapclient/SforcePartnerClient.php');
     
@@ -44,9 +43,10 @@
     $response = $mySforceConnection->query($query);
     $sObjects = array();
     
+    echo '<b>Processing the following files:</b><br/>';
     foreach ($response as $record) {
         $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
-        var_dump($filename);
+        echo $filename . '<br/>';
         $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
         
         // the target Sobject
@@ -62,11 +62,13 @@
         
         array_push($sObjects,$sObject);
     }
-    var_dump($sObjects);
-    echo 'Creating Attachment';
+    //var_dump($sObjects);
+    
+    echo '<b>Creating Attachments for Salesforce:</b><br/>';
     foreach ($sObjects as $attachment) {
         $createResponse = $mySforceConnection->create(array($attachment));
-        print_r($createResponse);    
+        print_r($createResponse);
+        echo '<br/>';
     }
     
     
