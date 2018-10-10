@@ -20,8 +20,18 @@ $mySforceConnection = new SforcePartnerClient();
 $mySforceConnection->createConnection("soapclient/partner_sandbox.wsdl.xml");
 $mySforceConnection->login(USERNAME, PASSWORD.SECURITY_TOKEN);
 
+$casIds = array();
+
+//Initialize arrays for Applications
 $casIdtoFile = array();
 $casIdtoEncodedFile = array();
+
+//Initialize arrays for Transcripts
+$casIdDocIdtoFile = array();
+$casIdDocIdtoEncodedFile = array();
+$documentIdToCasId = array();
+
+$pdfName = $request["pdf_manager_batch"]["pdf_manager_template"]["name"];
 
 //Loop through download hrefs and get file
 $i = 1;
@@ -30,8 +40,9 @@ foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
     // Get cURL resource
     $curl = curl_init();
     
-    $output_filename = "application" . $i .'.zip';
-    $extract_path = "/myzips/extractpath" .$i . '/';
+    $dateTimeIndex = date('YmdHis'). '_' . $i;
+    $output_filename = "application_" . $dateTimeIndex . '.zip';
+    $extract_path = "/myzips/" . $dateTimeIndex . '/';
     $fp = fopen($output_filename, 'w');
     
     // Set some options
@@ -62,16 +73,28 @@ foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
     $dir = dirname(__FILE__).$extract_path.'*';
     $dirNoStar = str_replace('*','',$dir);
     
-  	//Get CAS Id from filename
-  	foreach(glob($dir) as $file) {
-      $casId = str_replace($dirNoStar,'',$file);
-      $casId = substr($casId,0,strpos($casId, '_'));
-      $casIdtoFile[$casId] = $file; 
-      $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
+  	//Get CAS Id and Document ID if applicable from filename
+    foreach(glob($dir) as $file) {
+        $fileOnly = str_replace($dirNoStar,'',$file);
+        $fileParts = explode("_",$fileOnly);
+        $casId = $fileParts[0];
+        
+        if(strpos($pdfName, 'Full_Application') !== false) {
+            $casIdtoFile[$casId] = $file; 
+            $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
+            array_push($casIds,$casId);
+        }
+        
+        if(strpos($pdfName, 'Transcripts') !== false) {
+            $documentId = $fileParts[1];
+            $documentIdToCasId[$documentId] = $casId;
+            $casIdDocIdtoFile[$casId.'~'.$documentId] = $file; 
+            $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file)); 
+            array_push($casIds,$casId);
+        }    
     }
   	
     //Create CAS Id set for query string
-    $casIds = array_keys($casIdtoFile);
     $casIdsCommaSeperated = implode("','",$casIds);
     
     $i++;
@@ -82,29 +105,61 @@ $query = "SELECT Id, Name, CAS_ID__c from Opportunity WHERE CAS_ID__c IN ('".$ca
 $response = $mySforceConnection->query($query);
 $sObjects = array();
 
-//Iterate through response and create array of attachment sObjects to be sent to Salesforce.com
+//Create map of CAS Ids to Salesforce Ids
+$casIdToSFId = array();
 foreach ($response as $record) {
-    $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
-    var_dump($filename);
-    $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
-    
-    //The target Attachment Sobject
-    $createFields = array(
-        'Body' => $data,
-        'Name' => $filename,
-        'ParentId' => $record->Id,
-        'isPrivate' => 'false'
-    );
-    $sObject = new stdClass();
-    $sObject->fields = $createFields;
-    $sObject->type = 'Attachment';
-    
-    array_push($sObjects,$sObject);
+    $casIdToSFId[$record->fields->CAS_ID__c] = $record->Id;
 }
-var_dump($sObjects);
-echo 'Creating Attachment';
+
+//Iterate through response and create array of attachment sObjects to be sent to Salesforce.com
+echo '<b>Processing the following files:</b><br/>';
+
+if($strpos($pdfName, 'Full_Application') !== false) {
+    foreach ($response as $record) {
+        $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
+        echo $filename . '<br/>';
+        $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
+        
+        //The target Attachment Sobject
+        $createFields = array(
+            'Body' => $data,
+            'Name' => $filename,
+            'ParentId' => $record->Id,
+            'isPrivate' => 'false'
+        );
+        $sObject = new stdClass();
+        $sObject->fields = $createFields;
+        $sObject->type = 'Attachment';
+        
+        array_push($sObjects,$sObject);
+    }
+}
+
+if($strpos($pdfName, 'Transcripts') !== false) {
+    foreach ($documentIdToCasId as $doc => $cas) {
+        $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
+        echo $filename . '<br/>';
+        $data = $casIdDocIdtoEncodedFile[$cas.'~'.$doc];
+            
+        // the target Sobject
+        $createFields = array(
+            'Body' => $data,
+            'Name' => $filename,
+            'ParentId' => $casIdToSFId[$cas],
+            'isPrivate' => 'false'
+        );
+        $sObject = new stdClass();
+        $sObject->fields = $createFields;
+        $sObject->type = 'Attachment';
+        
+        array_push($sObjects,$sObject);
+    }
+}
+
+echo '<b>Creating Attachments for Salesforce:</b><br/>';
 foreach ($sObjects as $attachment) {
     $createResponse = $mySforceConnection->create(array($attachment));
-    print_r($createResponse);    
+    print_r($createResponse);
+    echo '<br/>';   
 }
 ?>
