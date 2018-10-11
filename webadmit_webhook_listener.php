@@ -114,7 +114,7 @@ foreach ($response as $record) {
 //Iterate through response and create array of attachment sObjects to be sent to Salesforce.com
 echo '<b>Processing the following files:</b><br/>';
 echo 'pdfName---' . $pdfName;
-if($strpos($pdfName, 'Full_Application') !== false) {
+if(strpos($pdfName, 'Full_Application') !== false) {
     foreach ($response as $record) {
         $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
         echo $filename . '<br/>';
@@ -135,7 +135,7 @@ if($strpos($pdfName, 'Full_Application') !== false) {
     }
 }
 
-if($strpos($pdfName, 'Transcripts') !== false) {
+if(strpos($pdfName, 'Transcripts') !== false) {
     foreach ($documentIdToCasId as $doc => $cas) {
         $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
         echo $filename . '<br/>';
