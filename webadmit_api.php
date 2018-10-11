@@ -32,7 +32,8 @@ function showTemplates(){
 function initRun($id){
     $key = 'f148bd717568fe2b2c8fbeec44c44b91';
     $userId = '280465';
-    $callback = 'https://mighty-cliffs-70333.herokuapp.com/webadmit_webhook_listener.php';
+    $callback = 'https://webhook.site/dbc2fdef-0ccf-41ce-b993-60b0ac3ffda3';
+    //$callback = 'https://mighty-cliffs-70333.herokuapp.com/webadmit_webhook_listener.php';
     
     $data = array("pdf_manager_template_id" => $id, "callback" => $callback);
     $data_string = json_encode($data);
