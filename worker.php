@@ -1,9 +1,9 @@
 <?php
-
+//Functions in this file can run for a long time!
 
 function slow_function(){
     $i = 0;
-    while ($i < 100) {
+    while ($i < 1000) {
 
         $servername = "valt-staging.c8gyn6fukmjc.us-east-1.rds.amazonaws.com:3306";
         $username = "veritas";
