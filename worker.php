@@ -18,7 +18,7 @@ function slow_function(){
             die("Connection failed: " . $conn->connect_error);
         } 
         
-        $sql = "INSERT INTO heroku (time)
+        $sql = "INSERT INTO heroku2 (time)
         VALUES (".time().")";
         
         if ($conn->query($sql) === TRUE) {
