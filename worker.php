@@ -1,5 +1,6 @@
 <?php
-//Functions in this file can run for a long time!
+//Functions in this file can run for a long time! 
+//This was tested for up to 5 minutes of runtime
 
 function slow_function(){
     $i = 0;
