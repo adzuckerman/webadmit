@@ -173,7 +173,7 @@ foreach ($sObjects as $attachment) {
 // slow_function();
 
 
-function slow_function(){
+
     $i = 0;
     while ($i < 1000) {
 
@@ -204,7 +204,7 @@ function slow_function(){
         sleep(1);
         $i ++;
     }
-}
+
 
 
 ?>
