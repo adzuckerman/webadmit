@@ -16,6 +16,7 @@ define("SECURITY_TOKEN", "33u454gypb0g8K0bgm33s45W");
 
 require_once ('soapclient/SforcePartnerClient.php');
 
+
 $mySforceConnection = new SforcePartnerClient();
 $mySforceConnection->createConnection("soapclient/partner_sandbox.wsdl.xml");
 $mySforceConnection->login(USERNAME, PASSWORD.SECURITY_TOKEN);
@@ -35,6 +36,9 @@ $pdfName = $request["pdf_manager_batch"]["pdf_manager_template"]["name"];
 
 //Loop through download hrefs and get file
 $i = 1;
+
+
+
 foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
     
     // Get cURL resource
@@ -162,4 +166,10 @@ foreach ($sObjects as $attachment) {
     print_r($createResponse);
     echo '<br/>';   
 }
+
+
+
+require_once ('worker.php');
+slow_function();
+
 ?>
