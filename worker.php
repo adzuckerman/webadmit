@@ -42,21 +42,21 @@ require 'vendor/autoload.php';
 define('AMQP_DEBUG', true);
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+
 $url = parse_url(getenv('CLOUDAMQP_URL'));
 $conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], substr($url['path'], 1));
 $ch = $conn->channel();
 
-$exchange = 'amq.direct';
 $queue = 'basic_get_queue';
-$ch->queue_declare($queue, false, true, false, false);
-$ch->exchange_declare($exchange, 'direct', true, true, false);
-$ch->queue_bind($queue, $exchange);
+$ch->queue_declare($queue, false, false, false, false);
+echo " [*] Waiting for messages. To exit press CTRL+C\n";
 
+$callback = function ($msg) {
+    echo ' [x] Received ', $msg->body, "\n";
+    slow_function($msg);
+};
 
-$retrived_msg = $ch->basic_get($queue);
-echo "received ". $retrived_msg->body . " </br>";
-slow_function($retrived_msg->body);
-$ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
+$ch->basic_consume($queue, '', false, true, false, false, $callback);
 
 while (count($ch->callbacks)) {
     $channel->wait();
