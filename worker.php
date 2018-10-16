@@ -57,16 +57,17 @@ while(true){
         $ch->queue_bind($queue, $exchange);
 
 
+
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
-        slow_function($retrived_msg->body);
+        if($retrived_msg->body > 0){
+            slow_function($retrived_msg->body);
+        }
         $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
 
         while (count($ch->callbacks)) {
             $channel->wait();
         }
-
-        var_dump($ch->callbacks);
 
         $ch->close();
         $conn->close();
