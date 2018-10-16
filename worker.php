@@ -48,12 +48,12 @@ $conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], subst
 $ch = $conn->channel();
 
 $queue = 'basic_get_queue';
-$ch->queue_declare($queue, false, false, false, false);
+$ch->queue_declare($queue, false, true, false, false);
 echo " [*] Waiting for messages. To exit press CTRL+C\n";
 
 $callback = function ($msg) {
     echo ' [x] Received ', $msg->body, "\n";
-    slow_function($msg);
+    slow_function($msg->body);
 };
 
 $ch->basic_consume($queue, '', false, true, false, false, $callback);
