@@ -14,6 +14,9 @@
     },
     "require": {
         "ext-soap": "*",
-        "php": ">=5.4.0"
+        "videlalvaro/php-amqplib": "2.2.*",
+        "ext-bcmath": "*",        
+        "php": ">=5.4.0",
+        "php-amqplib/php-amqplib": "^2.7"
     }
 }
