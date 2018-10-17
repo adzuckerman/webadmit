@@ -6,7 +6,7 @@ $userId = '280465';
 //Functions in this file can run for a long time!
 //This was tested for up to 5 minutes of runtime
 
-function slow_function($request){
+function process_request($request){
 
     var_dump($request);
 
@@ -238,6 +238,7 @@ function slow_function($request){
     //     sleep(1);
     //     $i ++;
     // }
+    return 1;
 }
 
 echo "HERE";
@@ -269,8 +270,15 @@ while(true){
             var_dump("MESSAGE");
             echo "</br></br>";
             var_dump($retrived_msg);
-            slow_function($retrived_msg->body);
-            $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
+            if(process_request($retrived_msg->body)){
+                $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
+            }else{
+                echo "ERROR";
+                error_log($retrived_msg->body);
+            }
+        }else{
+            echo "ERROR";
+            error_log($retrived_msg);
         }
 
         while (count($ch->callbacks)) {
