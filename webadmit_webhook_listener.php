@@ -39,28 +39,28 @@ $i = 1;
 
 
 foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
-    
+
     // Get cURL resource
     $curl = curl_init();
-    
+
     $dateTimeIndex = date('YmdHis'). '_' . $i;
     $output_filename = "application_" . $dateTimeIndex . '.zip';
     $extract_path = "/myzips/" . $dateTimeIndex . '/';
     $fp = fopen($output_filename, 'w');
-    
+
     // Set some options
     curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/' . $zip_download);
     curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-    
+
     // Send the request
     $content = curl_exec($curl);
-    
+
     // Close request to clear up some resources
     curl_close($curl);
-    
+
     fwrite($fp, $content);
     fclose($fp);
 
@@ -71,35 +71,35 @@ foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
       $zip->extractTo(dirname(__FILE__).$extract_path);
       $zip->close();
     }
-    
+
     //Iterate through extracted files in the extract path
     $dir = dirname(__FILE__).$extract_path.'*';
     $dirNoStar = str_replace('*','',$dir);
-    
+
   	//Get CAS Id and Document ID if applicable from filename
     foreach(glob($dir) as $file) {
         $fileOnly = str_replace($dirNoStar,'',$file);
         $fileParts = explode("_",$fileOnly);
         $casId = $fileParts[0];
-        
+
         if(strpos($pdfName, 'Full_Application') !== false) {
-            $casIdtoFile[$casId] = $file; 
+            $casIdtoFile[$casId] = $file;
             $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
             array_push($casIds,$casId);
         }
-        
+
         if(strpos($pdfName, 'Transcripts') !== false) {
             $documentId = $fileParts[1];
             $documentIdToCasId[$documentId] = $casId;
-            $casIdDocIdtoFile[$casId.'~'.$documentId] = $file; 
-            $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file)); 
+            $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
+            $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
             array_push($casIds,$casId);
-        }    
+        }
     }
-  	
+
     //Create CAS Id set for query string
     $casIdsCommaSeperated = implode("','",$casIds);
-    
+
     $i++;
 }
 
@@ -124,7 +124,7 @@ if(strpos($pdfName, 'Full_Application') !== false) {
             $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
             echo $filename . '<br/>';
             $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
-            
+
             //The target Attachment Sobject
             $createFields = array(
                 'Body' => $data,
@@ -135,13 +135,13 @@ if(strpos($pdfName, 'Full_Application') !== false) {
             $sObject = new stdClass();
             $sObject->fields = $createFields;
             $sObject->type = 'Attachment';
-            
+
             array_push($sObjects,$sObject);
         }
     }
 }
 
-//If no CAS transcript has been updloaded iterate through response and create 
+//If no CAS transcript has been updloaded iterate through response and create
 //array of transcript attachment sObjects to be sent to Salesforce.com
 if(strpos($pdfName, 'Transcripts') !== false) {
     foreach ($documentIdToCasId as $doc => $cas) {
@@ -149,7 +149,7 @@ if(strpos($pdfName, 'Transcripts') !== false) {
             $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
             echo $filename . '<br/>';
             $data = $casIdDocIdtoEncodedFile[$cas.'~'.$doc];
-                
+
             // the target Sobject
             $createFields = array(
                 'Body' => $data,
@@ -160,7 +160,7 @@ if(strpos($pdfName, 'Transcripts') !== false) {
             $sObject = new stdClass();
             $sObject->fields = $createFields;
             $sObject->type = 'Attachment';
-            
+
             array_push($sObjects,$sObject);
         }
     }
@@ -170,7 +170,7 @@ if(strpos($pdfName, 'Transcripts') !== false) {
 echo '<b>Creating Attachments for Salesforce:</b><br/>';
 foreach ($sObjects as $attachment) {
     $createResponse = $mySforceConnection->create(array($attachment));
-    
+
     //Get ready to update Opportunity records based on successful response
     if ($createResponse[0]->success && strpos($attachment->fields['Name'], 'Transcript') !== false){
         $fieldsToUpdate = array(
@@ -180,7 +180,7 @@ foreach ($sObjects as $attachment) {
         $opp->fields = $fieldsToUpdate;
         $opp->type = 'Opportunity';
         $opp->id = $attachment->fields['ParentId'];
-        
+
         array_push($opps,$opp);
     }
     else if($createResponse[0]->success && strpos($attachment->fields['Name'], 'Application') !== false){
@@ -191,12 +191,12 @@ foreach ($sObjects as $attachment) {
         $opp->fields = $fieldsToUpdate;
         $opp->type = 'Opportunity';
         $opp->Id = $attachment->fields['ParentId'];
-        
+
         array_push($opps,$opp);
     }
     print_r($createResponse);
     echo '<br/><br/>';
-    
+
     //Update Opportunity records
     echo '<b>Updating Opportunities:</b><br/>';
     $updateOppResponse = $mySforceConnection->update($opps);
@@ -205,13 +205,6 @@ foreach ($sObjects as $attachment) {
         echo '<br/>';
     }
 }
-
-
-
-require_once ('worker.php');
-slow_function();
-
-
 
 
 ?>
