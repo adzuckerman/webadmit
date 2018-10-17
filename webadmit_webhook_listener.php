@@ -9,11 +9,12 @@ header('Content-Type: application/json');
 $json = file_get_contents('php://input');
 $request = json_decode($json, true);
 
+require 'vendor/autoload.php';
+define('AMQP_DEBUG', true);
+use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Message\AMQPMessage;
+
 if($request !== NULL){
-    require 'vendor/autoload.php';
-    define('AMQP_DEBUG', true);
-    use PhpAmqpLib\Connection\AMQPConnection;
-    use PhpAmqpLib\Message\AMQPMessage;
     $url = parse_url(getenv('CLOUDAMQP_URL'));
     $conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], substr($url['path'], 1));
     $ch = $conn->channel();
