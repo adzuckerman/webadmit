@@ -33,6 +33,8 @@ if($request !== NULL){
     $conn->close();
 
     var_dump($request);
+    error_log("LISTENER Triggered");
+    error_log($request);
     echo "finish";
 }else{
     echo "NOTHING to process";
