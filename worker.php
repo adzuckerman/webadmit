@@ -282,16 +282,16 @@ while(true){
     } catch(AMQPIOException $e) {
         // cleanup_connection($conn);
         echo "AMQPIOException";
-        usleep(300);
+        usleep(10000000);
     } catch(\RuntimeException $e) {
         // cleanup_connection($conn);
         echo "RuntimeException";
 
-        usleep(300);
+        usleep(10000000);
     } catch(\ErrorException $e) {
         // cleanup_connection($conn);
         echo "ErrorException";
-        usleep(300);
+        usleep(10000000);
     }
 
 }
