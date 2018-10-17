@@ -9,6 +9,29 @@ header('Content-Type: application/json');
 $json = file_get_contents('php://input');
 $request = json_decode($json, true);
 
+require 'vendor/autoload.php';
+define('AMQP_DEBUG', true);
+use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Message\AMQPMessage;
+$url = parse_url(getenv('CLOUDAMQP_URL'));
+$conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], substr($url['path'], 1));
+$ch = $conn->channel();
+
+$exchange = 'amq.direct';
+$queue = 'basic_get_queue';
+$ch->queue_declare($queue, false, true, false, false);
+$ch->exchange_declare($exchange, 'direct', true, true, false);
+$ch->queue_bind($queue, $exchange);
+
+$msg = new AMQPMessage($request, array('content_type' => 'application/json', 'delivery_mode' => 2));
+$ch->basic_publish($msg, $exchange);
+
+$ch->close();
+$conn->close();
+
+/*
+print_r($request);
+
 //Create connection to Salesforce.com instance
 define("USERNAME", "azuckermanre@usa.edu.redev");
 define("PASSWORD", "OmnivoFall2018!");
@@ -208,3 +231,5 @@ foreach ($sObjects as $attachment) {
 
 
 ?>
+
+*/

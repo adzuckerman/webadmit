@@ -17,7 +17,7 @@ $i = 2;
 
 while($i < 50){
     $msg_body = $i;
-    $msg = new AMQPMessage($msg_body, array('content_type' => 'text/plain', 'delivery_mode' => 2));
+    $msg = new AMQPMessage($msg_body, array('content_type' => 'application/json', 'delivery_mode' => 2));
     $ch->basic_publish($msg, $exchange);
     $i ++;
 }
