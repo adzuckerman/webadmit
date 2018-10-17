@@ -25,32 +25,8 @@ if($request !== NULL){
     $ch->exchange_declare($exchange, 'direct', true, true, false);
     $ch->queue_bind($queue, $exchange);
 
-$msg = new AMQPMessage($request, array('content_type' => 'application/json', 'delivery_mode' => 2));
+    $msg = new AMQPMessage($request, array('content_type' => 'application/json', 'delivery_mode' => 2));
     $ch->basic_publish($msg, $exchange);
-
-//store request in mysql
-    $servername = "valt-staging.c8gyn6fukmjc.us-east-1.rds.amazonaws.com:3306";
-    $username = "veritas";
-    $password = "zrcjsu37sbcj4khzrmz8";
-    $dbname = "testing";
-
-    // Create connection
-    $mysql_conn = new mysqli($servername, $username, $password, $dbname);
-    // Check connection
-    if ($mysql_conn->connect_error) {
-    die("Connection failed: " . $mysql_conn->connect_error);
-    }
-
-    $sql = "INSERT INTO requests (request)
-    VALUES (".$request.")";
-
-    if ($mysql_conn->query($sql) === TRUE) {
-        echo "New record created successfully";
-    } else {
-        echo "Error: " . $sql . "<br>" . $mysql_conn->error;
-    }
-
-    $mysql_conn->close();
 
 
     $ch->close();
