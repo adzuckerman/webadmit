@@ -279,6 +279,7 @@ while(true){
         }else{
             echo "ERROR";
             error_log($retrived_msg);
+            print_r($retrived_msg);
         }
 
         while (count($ch->callbacks)) {

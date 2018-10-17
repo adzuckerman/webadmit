@@ -25,7 +25,7 @@ if($request !== NULL){
     $ch->exchange_declare($exchange, 'direct', true, true, false);
     $ch->queue_bind($queue, $exchange);
 
-    $msg = new AMQPMessage($request, array('content_type' => 'application/json', 'delivery_mode' => 2));
+    $msg = new AMQPMessage((string)$request, array('content_type' => 'text/plain', 'delivery_mode' => 2));
     $ch->basic_publish($msg, $exchange);
 
 
