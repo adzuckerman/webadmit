@@ -1,2 +1,2 @@
 <?php
-exec("php-cli  worker.php");
+exec("php  worker.php");
