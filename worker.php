@@ -277,14 +277,14 @@ while(true){
         $ch->close();
         $conn->close();
     } catch(AMQPIOException $e) {
-        cleanup_connection($conn);
-        usleep(WAIT_BEFORE_RECONNECT_uS);
+        // cleanup_connection($conn);
+        usleep(30);
     } catch(\RuntimeException $e) {
-        cleanup_connection($conn);
-        usleep(WAIT_BEFORE_RECONNECT_uS);
+        // cleanup_connection($conn);
+        usleep(30);
     } catch(\ErrorException $e) {
-        cleanup_connection($conn);
-        usleep(WAIT_BEFORE_RECONNECT_uS);
+        // cleanup_connection($conn);
+        usleep(30);
     }
 
 }
