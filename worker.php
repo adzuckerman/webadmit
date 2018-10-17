@@ -265,7 +265,7 @@ while(true){
 
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
-        if($retrived_msg->body > 0){
+        if($retrived_msg->body){
             var_dump("MESSAGE");
             echo "</br></br>";
             var_dump($retrived_msg);
