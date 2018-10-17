@@ -8,7 +8,7 @@ $userId = '280465';
 
 function slow_function($request){
 
-    print_r($request);
+    var_dump($request);
 
     //Create connection to Salesforce.com instance
     define("USERNAME", "azuckermanre@usa.edu.redev");
@@ -266,6 +266,9 @@ while(true){
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
         if($retrived_msg->body > 0){
+            var_dump("MESSAGE");
+            echo "</br></br>";
+            var_dump($retrived_msg);
             slow_function($retrived_msg->body);
             $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
         }
