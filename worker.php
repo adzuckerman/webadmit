@@ -62,8 +62,8 @@ while(true){
         echo "received ". $retrived_msg->body . " </br>";
         if($retrived_msg->body > 0){
             slow_function($retrived_msg->body);
+            $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
         }
-        $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
 
         while (count($ch->callbacks)) {
             $channel->wait();
