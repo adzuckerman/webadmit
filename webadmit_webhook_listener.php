@@ -29,6 +29,7 @@ $ch->basic_publish($msg, $exchange);
 $ch->close();
 $conn->close();
 
+echo "finish";
 /*
 print_r($request);
 
