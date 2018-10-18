@@ -59,7 +59,9 @@ function process_request($request){
 
         // Send the request
         $content = curl_exec($curl);
-
+        echo " CONTENT  ";        
+        var_dump($content);
+        echo " CONTENT  ";
         // Close request to clear up some resources
         curl_close($curl);
         echo "FP";
