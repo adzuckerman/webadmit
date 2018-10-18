@@ -53,7 +53,7 @@ function process_request($request){
         echo "zip to download";
         var_dump($zip_download);
         // Set some options
-        curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/' . $zip_download);
+        curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org' . $zip_download);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
