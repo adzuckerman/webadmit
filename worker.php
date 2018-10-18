@@ -79,6 +79,7 @@ function process_request($request){
 
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
+            echo "line 82";
             $fileOnly = str_replace($dirNoStar,'',$file);
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
@@ -151,7 +152,7 @@ function process_request($request){
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
-        echo "154";
+        echo "Transcripts 154";
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 155";
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
