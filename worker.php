@@ -43,7 +43,7 @@ function process_request($request){
         // Get cURL resource
 
         $dateTimeIndex = date('YmdHis'). '_' . $i;
-        $output_filename = "application_" . $dateTimeIndex . '.zip';
+        $output_filename = $pdfName . $dateTimeIndex . '.zip';
         $extract_path = "/myzips/" . $dateTimeIndex . '/';
         echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
@@ -127,6 +127,9 @@ function process_request($request){
           echo "NO RESPONSE";
           return false;
         }
+        else {
+            die('Extraction failed. Please specify a valid zipfile.');
+        }
 
         //Iterate through extracted files in the extract path
         $dir = dirname(__FILE__).$extract_path.'*';
@@ -144,16 +147,16 @@ function process_request($request){
                 $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
             }
-
-            if(strpos($pdfName, 'Transcripts') !== false) {
-                echo "PDF NAME IS Transcripts";
+            else if (strpos($pdfName, 'Transcripts') !== false) {
                 $documentId = $fileParts[1];
                 $documentIdToCasId[$documentId] = $casId;
                 $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
                 $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
             }
-            echo $pdfName;
+            else {
+                die('There was an unexpected PDF name.');
+            }
         }
 
         //Create CAS Id set for query string
@@ -177,7 +180,7 @@ function process_request($request){
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     echo '<b>Processing the following files:</b><br/>';
-    echo "RESPONSE ABOVE";
+    print_r($response);
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
             var_dump($record->CAS_Application_Uploaded__c);
@@ -219,7 +222,7 @@ function process_request($request){
                 $createFields = array(
                     'Body' => $data,
                     'Name' => $filename,
-                    'ParentId' => $casIdtoRecord['$cas']->fields->Id,
+                    'ParentId' => $casIdtoRecord[$cas]->Id,
                     'isPrivate' => 'false'
                 );
                 $sObject = new stdClass();
@@ -248,7 +251,7 @@ function process_request($request){
             $opp = new stdClass();
             $opp->fields = $fieldsToUpdate;
             $opp->type = 'Opportunity';
-            $opp->id = $attachment->fields['ParentId'];
+            $opp->Id = $attachment->fields['ParentId'];
 
             array_push($opps,$opp);
         }
