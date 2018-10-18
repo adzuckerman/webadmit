@@ -68,6 +68,7 @@ function process_request($request){
         var_dump($content);
         if($content == " "){
             echo "IN THE IF ==== ";
+            $key = 'f148bd717568fe2b2c8fbeec44c44b91';
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
             curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
