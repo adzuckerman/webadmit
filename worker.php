@@ -8,7 +8,6 @@ $userId = '280465';
 
 function process_request($request){
 
-    var_dump($request);
 
     //Create connection to Salesforce.com instance
     define("USERNAME", "azuckermanre@usa.edu.redev");
@@ -178,7 +177,6 @@ function process_request($request){
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     echo '<b>Processing the following files:</b><br/>';
-    var_dump($response);
     echo "RESPONSE ABOVE";
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
