@@ -50,6 +50,8 @@ function process_request($request){
         echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
 
+        echo "zip to download";
+        var_dump($zip_download);
         // Set some options
         curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/' . $zip_download);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
