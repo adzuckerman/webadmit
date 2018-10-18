@@ -54,7 +54,7 @@ function process_request($request){
         // Set some options
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org'.$zip_download);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
@@ -67,6 +67,7 @@ function process_request($request){
         echo " CONTENT  ";
         var_dump($content);
         if($content == " "){
+            echo "IN THE IF ==== ";
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
             curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
