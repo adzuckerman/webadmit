@@ -42,7 +42,6 @@ function process_request($request){
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
         echo "Line 43";
         // Get cURL resource
-        $curl = curl_init();
 
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = "application_" . $dateTimeIndex . '.zip';
@@ -53,7 +52,9 @@ function process_request($request){
         echo "zip to download";
         var_dump($zip_download);
         // Set some options
-        curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287986/download');
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
@@ -61,8 +62,21 @@ function process_request($request){
 
         // Send the request
         $content = curl_exec($curl);
+
+
         echo " CONTENT  ";
         var_dump($content);
+        if($content == " "){
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_AUTOREFERER, true);
+
+            // Send the request
+            $content = curl_exec($curl);
+        }
         echo " zip_download  ";
         var_dump($zip_download);
         // Close request to clear up some resources
