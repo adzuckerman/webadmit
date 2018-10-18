@@ -38,7 +38,7 @@ function process_request($request){
     $i = 1;
 
 
-
+    var_dump($request["pdf_manager_batch"]["download_hrefs"]);
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
         echo "Line 43";
         // Get cURL resource
