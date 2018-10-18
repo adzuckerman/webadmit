@@ -261,7 +261,6 @@ while(true){
         if($retrived_msg->body){
             var_dump("MESSAGE");
             echo "</br></br>";
-            var_dump(json_decode($retrived_msg->body, true));
             if(process_request(json_decode($retrived_msg->body, true))){
                 $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
                 echo "GOOD";
