@@ -70,7 +70,7 @@ function process_request($request){
         fclose($fp);
 
         echo "File exists ? ";
-        var_dump($output_filename);
+        var_dump(file_exists($output_filename));
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
