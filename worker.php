@@ -52,7 +52,7 @@ function process_request($request){
         echo "zip to download";
         var_dump($zip_download);
         // Set some options
-
+        $key = 'f148bd717568fe2b2c8fbeec44c44b91';
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org'.$zip_download);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
