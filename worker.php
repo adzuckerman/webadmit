@@ -90,6 +90,24 @@ function process_request($request){
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
         }else{
+
+            echo "NO RESPONSE";
+            echo "test test test test test testtest test testtest test testtest test testtest test testtest test test";
+            $key = 'f148bd717568fe2b2c8fbeec44c44b91';
+            $curl = curl_init();
+
+            // Set some options
+            curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_AUTOREFERER, true);
+
+            // Send the request
+            $content = curl_exec($curl);
+            echo " CONTENT  ";
+            var_dump($content);
+
           echo "NO RESPONSE";
           return false;
         }

@@ -21,10 +21,25 @@
 // $ch->close();
 // $conn->close();
 
+//
+// $myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+// $txt = "Mickey Mouse\n";
+// fwrite($myfile, $txt);
+// $txt = "Minnie Mouse\n";
+// fwrite($myfile, $txt);
+// fclose($myfile);
 
-$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
-$txt = "Mickey Mouse\n";
-fwrite($myfile, $txt);
-$txt = "Minnie Mouse\n";
-fwrite($myfile, $txt);
-fclose($myfile);
+$key = 'f148bd717568fe2b2c8fbeec44c44b91';
+$curl = curl_init();
+
+// Set some options
+curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org/api/v1/user_identities/280464/pdf_manager_zip_files/287988/download');
+curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($curl, CURLOPT_AUTOREFERER, true);
+
+// Send the request
+$content = curl_exec($curl);
+echo " CONTENT  ";
+var_dump($content);
