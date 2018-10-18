@@ -119,7 +119,7 @@ function process_request($request){
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     echo '<b>Processing the following files:</b><br/>';
-    pring_r($response);
+    print_r($response);
     var_dump($response);
     echo "RESPONSE ABOVE";
     if(strpos($pdfName, 'Full_Application') !== false) {
