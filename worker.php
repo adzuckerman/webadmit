@@ -67,7 +67,7 @@ function process_request($request){
 
         //unzip file
         $zip = new ZipArchive;
-        $res = $zip->open($output_filename
+        $res = $zip->open($output_filename);
         echo "RESPONSE ZIP OPEN";
         var_dump($res);
         echo "RESPONSE ZIP ABOVE";
