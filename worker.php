@@ -67,11 +67,17 @@ function process_request($request){
 
         //unzip file
         $zip = new ZipArchive;
-        $res = $zip->open($output_filename);
+        $res = $zip->open($output_filename
+        echo "RESPONSE ZIP OPEN";
+        var_dump($res);
+        echo "RESPONSE ZIP ABOVE";
         if ($res === TRUE) {
           echo "response is true";
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
+        }else{
+          echo "NO RESPONSE";
+          return false;
         }
 
         //Iterate through extracted files in the extract path
