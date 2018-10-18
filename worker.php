@@ -71,6 +71,9 @@ function process_request($request){
 
         echo "File exists ? ";
         var_dump(file_exists($output_filename));
+        echo " File size? ";
+        var_dump(filesize($output_filename));
+
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
