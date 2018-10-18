@@ -120,6 +120,8 @@ function process_request($request){
     //array of application attachment sObjects to be sent to Salesforce.com
     echo '<b>Processing the following files:</b><br/>';
     pring_r($response);
+    var_dump($response);
+    echo "RESPONSE ABOVE";
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
             if($record->CAS_Application_Uploaded__c == 'false'){
