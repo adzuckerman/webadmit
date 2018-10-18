@@ -145,6 +145,7 @@ function process_request($request){
         }
     }
 
+    echo "148";
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
@@ -172,7 +173,9 @@ function process_request($request){
 
     //Create attachments and update Opportunities
     echo '<b>Creating Attachments for Salesforce:</b><br/>';
+    print_r($sObjects);
     foreach ($sObjects as $attachment) {
+        echo "178";
         $createResponse = $mySforceConnection->create(array($attachment));
 
         //Get ready to update Opportunity records based on successful response
@@ -210,38 +213,7 @@ function process_request($request){
         }
     }
 
-
-    // $i = 0;
-    // while ($i < 2) {
-    //
-    //     $servername = "valt-staging.c8gyn6fukmjc.us-east-1.rds.amazonaws.com:3306";
-    //     $username = "veritas";
-    //     $password = "zrcjsu37sbcj4khzrmz8";
-    //     $dbname = "testing";
-    //
-    //     // Create connection
-    //     $conn = new mysqli($servername, $username, $password, $dbname);
-    //     // Check connection
-    //     if ($conn->connect_error) {
-    //         die("Connection failed: " . $conn->connect_error);
-    //     }
-    //
-    //     $sql = "INSERT INTO heroku2 (time, queue)
-    //     VALUES (".time().", ".$message.")";
-    //
-    //     if ($conn->query($sql) === TRUE) {
-    //         echo "New record created successfully";
-    //     } else {
-    //         echo "Error: " . $sql . "<br>" . $conn->error;
-    //     }
-    //
-    //     $conn->close();
-    //
-    //     echo 'Hello world at ' . time() . PHP_EOL;
-    //     sleep(1);
-    //     $i ++;
-    // }
-    return 1;
+    return true;
 }
 
 echo "HERE";
