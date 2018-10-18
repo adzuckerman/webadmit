@@ -68,6 +68,8 @@ function process_request($request){
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
+        echo "output_filename";
+        echo $output_filename;
         echo "RESPONSE ZIP OPEN";
         var_dump($res);
         echo "RESPONSE ZIP ABOVE";
@@ -129,7 +131,6 @@ function process_request($request){
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     echo '<b>Processing the following files:</b><br/>';
-    print_r($response);
     var_dump($response);
     echo "RESPONSE ABOVE";
     if(strpos($pdfName, 'Full_Application') !== false) {
