@@ -69,6 +69,15 @@ function process_request($request){
         echo "FWRITE !";
         fclose($fp);
 
+
+        $myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+        $txt = "Mickey Mouse\n";
+        fwrite($myfile, $txt);
+        $txt = "Minnie Mouse\n";
+        fwrite($myfile, $txt);
+        fclose($myfile);
+
+
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
