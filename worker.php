@@ -47,6 +47,7 @@ function process_request($request){
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = "application_" . $dateTimeIndex . '.zip';
         $extract_path = "/myzips/" . $dateTimeIndex . '/';
+        echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
 
         // Set some options
@@ -62,7 +63,7 @@ function process_request($request){
         // Close request to clear up some resources
         curl_close($curl);
         echo "FP";
-        var_dump($fp); 
+        var_dump($fp);
         echo "FWRITE :";
         echo fwrite($fp, $content);
         echo "FWRITE !";
