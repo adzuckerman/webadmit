@@ -69,6 +69,7 @@ function process_request($request){
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
         if ($res === TRUE) {
+          echo "response is true";
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
         }
