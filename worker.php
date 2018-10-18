@@ -65,7 +65,6 @@ function process_request($request){
 
 
         echo " CONTENT  ";
-        var_dump($content);
         if($content == " "){
             echo "IN THE IF ==== ";
             $key = 'f148bd717568fe2b2c8fbeec44c44b91';
