@@ -108,7 +108,7 @@ function process_request($request){
             // Send the request
             $content = curl_exec($curl);
             echo " CONTENT  ";
-            var_dump(sizeof($content));
+            var_dump(($content));
 
           echo "NO RESPONSE";
           return false;
