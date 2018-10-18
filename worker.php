@@ -235,7 +235,7 @@ function process_request($request){
 
     //Create attachments and update Opportunities
     echo '<b>Creating Attachments for Salesforce:</b><br/>';
-    print_r($sObjects);
+    echo count($sObjects);
     foreach ($sObjects as $attachment) {
         echo "178";
         $createResponse = $mySforceConnection->create(array($attachment));
