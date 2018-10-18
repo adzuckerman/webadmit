@@ -61,7 +61,8 @@ function process_request($request){
 
         // Close request to clear up some resources
         curl_close($curl);
-
+        echo "FP";
+        var_dump($fp); 
         echo "FWRITE :";
         echo fwrite($fp, $content);
         echo "FWRITE !";
