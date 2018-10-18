@@ -180,6 +180,7 @@ function process_request($request){
     echo "RESPONSE ABOVE";
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
+            var_dump($record->CAS_Application_Uploaded__c);
             if($record->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
                 echo $filename . '<br/>';
@@ -208,6 +209,7 @@ function process_request($request){
         echo "Transcripts 154";
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 155";
+            var_dump($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c);
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
