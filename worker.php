@@ -40,7 +40,7 @@ function process_request($request){
 
 
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
-
+        echo "Line 43";
         // Get cURL resource
         $curl = curl_init();
 
