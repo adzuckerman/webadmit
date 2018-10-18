@@ -151,6 +151,7 @@ function process_request($request){
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
+        echo "154";
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 155";
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
