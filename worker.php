@@ -90,12 +90,14 @@ function process_request($request){
             }
 
             if(strpos($pdfName, 'Transcripts') !== false) {
+                echo "PDF NAME IS Transcripts";
                 $documentId = $fileParts[1];
                 $documentIdToCasId[$documentId] = $casId;
                 $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
                 $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
             }
+            echo $pdfName;
         }
 
         //Create CAS Id set for query string
@@ -150,6 +152,7 @@ function process_request($request){
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
         foreach ($documentIdToCasId as $doc => $cas) {
+            echo "In foreach 155";
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
@@ -170,6 +173,8 @@ function process_request($request){
             }
         }
     }
+    var_dump($pdfName);
+    echo "PDF NAME";
 
     //Create attachments and update Opportunities
     echo '<b>Creating Attachments for Salesforce:</b><br/>';
