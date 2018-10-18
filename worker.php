@@ -62,7 +62,9 @@ function process_request($request){
         // Close request to clear up some resources
         curl_close($curl);
 
-        fwrite($fp, $content);
+        echo "FWRITE :";
+        echo fwrite($fp, $content);
+        echo "FWRITE !";
         fclose($fp);
 
         //unzip file
@@ -291,6 +293,7 @@ while(true){
     } catch(\ErrorException $e) {
         // cleanup_connection($conn);
         echo "ErrorException";
+        var_dump($e);
         usleep(60000000);
     }
 
