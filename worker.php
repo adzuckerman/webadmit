@@ -1,7 +1,7 @@
 <?php
 ini_set('memory_limit', '-1');
+
 $key = 'f148bd717568fe2b2c8fbeec44c44b91';
-$userId = '280465';
 
 //Functions in this file can run for a long time!
 //This was tested for up to 5 minutes of runtime
@@ -21,6 +21,7 @@ function process_request($request){
     $mySforceConnection->login(USERNAME, PASSWORD.SECURITY_TOKEN);
 
     $casIds = array();
+    $docIds = array();
 
     //Initialize arrays for Applications
     $casIdtoFile = array();
@@ -44,7 +45,7 @@ function process_request($request){
 
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
-        $extract_path = "/myzips/" . $dateTimeIndex . '/';
+        $extract_path = "/myzips/" . $pdfName . $dateTimeIndex . '/';
         echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
 
@@ -131,6 +132,7 @@ function process_request($request){
                 $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
                 $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
+                array_push($docIds,$documentId);
             }
             else {
                 die('There was an unexpected PDF name.');
@@ -150,9 +152,11 @@ function process_request($request){
     $opps = array();
 
     //Create map of CAS Ids to Salesforce records
-    $casIdToRecord = array();
+    $casIdDocIdToRecord = array();
     foreach ($response as $record) {
-        $casIdToRecord[$record->fields->CAS_ID__c] = $record;
+        foreach ($docIds as $docId){
+            $casIdDocIdToRecord[$record->fields->CAS_ID__c.'~'. $docId] = $record;    
+        }
     }
 
     //If no CAS application has been updloaded iterate through response and create
@@ -161,8 +165,8 @@ function process_request($request){
     print_r($response);
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
-            var_dump($record->CAS_Application_Uploaded__c);
-            if($record->CAS_Application_Uploaded__c == 'false'){
+            var_dump($record->fields->CAS_Application_Uploaded__c);
+            if($record->fields->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
                 echo $filename . '<br/>';
                 $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
@@ -190,8 +194,8 @@ function process_request($request){
         echo "Transcripts 154";
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 155";
-            var_dump($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c);
-            if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
+            var_dump($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c);
+            if($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
                 $data = $casIdDocIdtoEncodedFile[$cas.'~'.$doc];
@@ -200,7 +204,7 @@ function process_request($request){
                 $createFields = array(
                     'Body' => $data,
                     'Name' => $filename,
-                    'ParentId' => $casIdtoRecord[$cas]->Id,
+                    'ParentId' => $casIdDocIdToRecord[$cas.'~'.$doc]->Id,
                     'isPrivate' => 'false'
                 );
                 $sObject = new stdClass();
