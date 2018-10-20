@@ -166,14 +166,10 @@ function process_request($request){
     var_dump($casIdToRecord);
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
-    echo '<b>Processing the following files:</b><br/>';
-    print_r($response);
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
-            var_dump($record->CAS_Application_Uploaded__c);
             if($record->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
-                echo $filename . '<br/>';
                 $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
 
                 //The target Attachment Sobject
@@ -188,7 +184,6 @@ function process_request($request){
                 $sObject->type = 'Attachment';
 
                 // array_push($sObjects,$sObject);
-                echo "182";
                 //START
                 $createResponse = $mySforceConnection->create(array($sObject));
 
@@ -215,15 +210,10 @@ function process_request($request){
 
                     array_push($opps,$opp);
                 }
-                print_r($createResponse);
-                echo '<br/><br/>';
 
                 //Update Opportunity records
-                echo '<b>Updating Opportunities:</b><br/>';
                 $updateOppResponse = $mySforceConnection->update($opps);
                 foreach($updateOppResponse as $myOpp) {
-                    print_r($myOpp);
-                    echo '<br/>';
                 }
 
 
