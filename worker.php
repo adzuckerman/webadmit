@@ -264,6 +264,7 @@ function process_request($request){
     }
     echo '<b>Creatted Attachments for Salesforce:</b><br/>';
     // foreach ($sObjects as $attachment) {
+    
     //     echo "178";
     //     $createResponse = $mySforceConnection->create(array($attachment));
     //
