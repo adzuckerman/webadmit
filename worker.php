@@ -243,7 +243,8 @@ function process_request($request){
             var_dump($casIdtoRecord[$cas]);
             echo "In foreach 244 CAS ========== : ". $cas . " TRANSCRIPT : ";
 
-            print_r($casIdtoRecord);
+            var_dump($casIdtoRecord);
+            echo "that was it";
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
