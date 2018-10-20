@@ -234,7 +234,7 @@ function process_request($request){
             var_dump($casIdToRecordTranscripts[$cas]);
             echo " ===== that was it for casIdToRecordTranscripts ===== ";
 
-            if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
+            if($casIdToRecordTranscripts[$cas] == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
                 $data = $casIdDocIdtoEncodedFile[$cas.'~'.$doc];
