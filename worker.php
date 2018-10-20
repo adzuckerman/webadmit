@@ -153,8 +153,12 @@ function process_request($request){
     $casIdToRecord = array();
     foreach ($response as $record) {
         echo "155";
+        echo "Record -> ";
         var_dump($record);
+        echo "record->fields -> ";
         var_dump($record->fields);
+        echo "record->fields->CAS_ID__c -> ";
+
         var_dump($record->fields->CAS_ID__c);
         $casIdToRecord[$record->fields->CAS_ID__c] = $record;
     }
