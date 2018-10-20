@@ -162,7 +162,8 @@ function process_request($request){
         var_dump($record->fields->CAS_ID__c);
         $casIdToRecord[$record->fields->CAS_ID__c] = $record;
     }
-
+    echo "THE ENTIRE THING";
+    var_dump($casIdToRecord);
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     echo '<b>Processing the following files:</b><br/>';
@@ -240,6 +241,8 @@ function process_request($request){
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 233 CAS ========== : ". $cas . " TRANSCRIPT : ";
             var_dump($casIdtoRecord[$cas]);
+            echo "In foreach 244 CAS ========== : ". $cas . " TRANSCRIPT : ";
+
             print_r($casIdtoRecord);
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
