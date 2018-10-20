@@ -162,8 +162,6 @@ function process_request($request){
         var_dump($record->fields->CAS_ID__c);
         $casIdToRecord[$record->fields->CAS_ID__c] = $record;
     }
-    echo "THE ENTIRE THING";
-    var_dump($casIdToRecord);
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Full_Application') !== false) {
@@ -254,46 +252,46 @@ function process_request($request){
                 // array_push($sObjects,$sObject);
 
 
-//START
-echo "255";
-$createResponse = $mySforceConnection->create(array($sObject));
+                //START
+                echo "255";
+                $createResponse = $mySforceConnection->create(array($sObject));
 
-//Get ready to update Opportunity records based on successful response
-if ($createResponse[0]->success && strpos($sObject->fields['Name'], 'Transcript') !== false){
-    $fieldsToUpdate = array(
-        'CAS_Transcript_Uploaded__c' => 'true'
-    );
-    $opp = new stdClass();
-    $opp->fields = $fieldsToUpdate;
-    $opp->type = 'Opportunity';
-    $opp->Id = $sObject->fields['ParentId'];
+                //Get ready to update Opportunity records based on successful response
+                if ($createResponse[0]->success && strpos($sObject->fields['Name'], 'Transcript') !== false){
+                    $fieldsToUpdate = array(
+                        'CAS_Transcript_Uploaded__c' => 'true'
+                    );
+                    $opp = new stdClass();
+                    $opp->fields = $fieldsToUpdate;
+                    $opp->type = 'Opportunity';
+                    $opp->Id = $sObject->fields['ParentId'];
 
-    array_push($opps,$opp);
-}
-else if($createResponse[0]->success && strpos($sObject->fields['Name'], 'Application') !== false){
-    $fieldsToUpdate = array(
-        'CAS_Application_Uploaded__c' => 'true'
-    );
-    $opp = new stdClass();
-    $opp->fields = $fieldsToUpdate;
-    $opp->type = 'Opportunity';
-    $opp->Id = $sObject->fields['ParentId'];
+                    array_push($opps,$opp);
+                }
+                else if($createResponse[0]->success && strpos($sObject->fields['Name'], 'Application') !== false){
+                    $fieldsToUpdate = array(
+                        'CAS_Application_Uploaded__c' => 'true'
+                    );
+                    $opp = new stdClass();
+                    $opp->fields = $fieldsToUpdate;
+                    $opp->type = 'Opportunity';
+                    $opp->Id = $sObject->fields['ParentId'];
 
-    array_push($opps,$opp);
-}
-print_r($createResponse);
-echo '<br/><br/>';
+                    array_push($opps,$opp);
+                }
+                print_r($createResponse);
+                echo '<br/><br/>';
 
-//Update Opportunity records
-echo '<b>Updating Opportunities:</b><br/>';
-$updateOppResponse = $mySforceConnection->update($opps);
-foreach($updateOppResponse as $myOpp) {
-    print_r($myOpp);
-    echo '<br/>';
-}
+                //Update Opportunity records
+                echo '<b>Updating Opportunities:</b><br/>';
+                $updateOppResponse = $mySforceConnection->update($opps);
+                foreach($updateOppResponse as $myOpp) {
+                    print_r($myOpp);
+                    echo '<br/>';
+                }
 
 
-//END
+                //END
 
 
             }
