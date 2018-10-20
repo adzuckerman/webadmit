@@ -37,19 +37,14 @@ function process_request($request){
     $i = 1;
 
 
-    var_dump($request["pdf_manager_batch"]["download_hrefs"]);
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
-        echo "Line 43";
         // Get cURL resource
 
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
         $extract_path = "/myzips/" . $dateTimeIndex . '/';
-        echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
 
-        echo "zip to download";
-        var_dump($zip_download);
         // Set some options
         $key = 'f148bd717568fe2b2c8fbeec44c44b91';
         $curl = curl_init();
@@ -62,10 +57,7 @@ function process_request($request){
         // Send the request
         $content = curl_exec($curl);
 
-
-        echo " CONTENT  ";
         if($content == " "){
-            echo "IN THE IF ==== ";
             $key = 'f148bd717568fe2b2c8fbeec44c44b91';
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org'.$zip_download);
@@ -77,32 +69,15 @@ function process_request($request){
             // Send the request
             $content = curl_exec($curl);
         }
-        echo " zip_download  ";
-        var_dump($zip_download);
         // Close request to clear up some resources
         curl_close($curl);
-        echo "FP";
-        var_dump($fp);
-        echo "FWRITE :";
-        echo fwrite($fp, $content);
-        echo "FWRITE !";
+        fwrite($fp, $content);
         fclose($fp);
-
-        echo "File exists ? ";
-        var_dump(file_exists($output_filename));
-        echo " File size? ";
-        var_dump(filesize($output_filename));
 
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
-        echo "output_filename";
-        echo $output_filename;
-        echo "RESPONSE ZIP OPEN";
-        var_dump($res);
-        echo "RESPONSE ZIP ABOVE";
         if ($res === TRUE) {
-          echo "response is true";
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
         }else {
@@ -200,10 +175,7 @@ function process_request($request){
                 $updateOppResponse = $mySforceConnection->update($opps);
                 foreach($updateOppResponse as $myOpp) {
                 }
-
-
                 //END
-
             }
         }
     }
@@ -218,22 +190,11 @@ function process_request($request){
         $casIdToRecordTranscripts = array();
 
         foreach ($response as $record) {
-            echo "219";
-            echo "record->fields -> ";
-            echo $record->fields->CAS_ID__c;
             $casIdToRecord[$record->fields->CAS_ID__c] = $record;
             $casIdToRecordTranscripts[$record->fields->CAS_ID__c] = $record->fields->CAS_Transcript_Uploaded__c ;
             echo "CAS ID  ".$record->fields->CAS_ID__c. " TRANSCRIPT 226 nreigsdna ". $record->fields->CAS_Transcript_Uploaded__c;
         }
-
-        echo "Transcripts 231";
         foreach ($documentIdToCasId as $doc => $cas) {
-            echo "In foreach 244 CAS ========== : ". $cas . " TRANSCRIPT : ";
-            var_dump($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c);
-            echo "that was it for casIdtoRecord ===== ";
-            var_dump($casIdToRecordTranscripts[$cas]);
-            echo " ===== that was it for casIdToRecordTranscripts ===== ";
-
             // if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
             if($casIdToRecordTranscripts[$cas] == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
@@ -301,9 +262,6 @@ function process_request($request){
             }
         }
     }
-    var_dump($pdfName);
-    echo "PDF NAME";
-
     //Create attachments and update Opportunities
     echo '<b>Creatted Attachments for Salesforce:</b><br/>';
     // foreach ($sObjects as $attachment) {
