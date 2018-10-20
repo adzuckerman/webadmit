@@ -149,19 +149,6 @@ function process_request($request){
     $sObjects = array();
     $opps = array();
 
-    //Create map of CAS Ids to Salesforce records
-    $casIdToRecord = array();
-    foreach ($response as $record) {
-        echo "155";
-        echo "Record -> ";
-        var_dump($record);
-        echo "record->fields -> ";
-        var_dump($record->fields);
-        echo "record->fields->CAS_ID__c -> ";
-
-        var_dump($record->fields->CAS_ID__c);
-        $casIdToRecord[$record->fields->CAS_ID__c] = $record;
-    }
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Full_Application') !== false) {
@@ -225,14 +212,27 @@ function process_request($request){
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
+
+        //Create map of CAS Ids to Salesforce records
+        $casIdToRecord = array();
+        $casIdToRecordTranscripts = array();
+
+        foreach ($response as $record) {
+            echo "219";
+            echo "record->fields -> ";
+            echo $record->fields->CAS_ID__c;
+            $casIdToRecord[$record->fields->CAS_ID__c] = $record;
+            $casIdToRecordTranscripts[$record->fields->CAS_ID__c] = $record->fields->CAS_Transcript_Uploaded__ ;
+        }
+
         echo "Transcripts 231";
         foreach ($documentIdToCasId as $doc => $cas) {
-            echo "In foreach 233 CAS ========== : ". $cas . " TRANSCRIPT : ";
-            var_dump($casIdtoRecord[$cas]);
             echo "In foreach 244 CAS ========== : ". $cas . " TRANSCRIPT : ";
+            var_dump($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c);
+            echo "that was it for casIdtoRecord ===== ";
+            var_dump($casIdToRecordTranscripts[$cas]);
+            echo " ===== that was it for casIdToRecordTranscripts ===== ";
 
-            var_dump($casIdtoRecord);
-            echo "that was it";
             if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
