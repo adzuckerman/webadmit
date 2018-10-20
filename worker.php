@@ -222,7 +222,8 @@ function process_request($request){
             echo "record->fields -> ";
             echo $record->fields->CAS_ID__c;
             $casIdToRecord[$record->fields->CAS_ID__c] = $record;
-            $casIdToRecordTranscripts[$record->fields->CAS_ID__c] = $record->fields->CAS_Transcript_Uploaded__ ;
+            $casIdToRecordTranscripts[$record->fields->CAS_ID__c] = $record->fields->CAS_Transcript_Uploaded__c ;
+            echo "CAS ID  ".$record->fields->CAS_ID__c. " TRANSCRIPT 226 nreigsdna ". $record->fields->CAS_Transcript_Uploaded__c;
         }
 
         echo "Transcripts 231";
