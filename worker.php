@@ -152,6 +152,10 @@ function process_request($request){
     //Create map of CAS Ids to Salesforce records
     $casIdToRecord = array();
     foreach ($response as $record) {
+        echo "155";
+        var_dump($record);
+        var_dump($record->fields);
+        var_dump($record->fields->CAS_ID__c);
         $casIdToRecord[$record->fields->CAS_ID__c] = $record;
     }
 
