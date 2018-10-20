@@ -116,7 +116,7 @@ function process_request($request){
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
             echo "line 82";
-            $fileOnly = str_replace($dirNoStar,'',$file);it
+            $fileOnly = str_replace($dirNoStar,'',$file);
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
 
