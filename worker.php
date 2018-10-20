@@ -234,6 +234,7 @@ function process_request($request){
             var_dump($casIdToRecordTranscripts[$cas]);
             echo " ===== that was it for casIdToRecordTranscripts ===== ";
 
+            // if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
             if($casIdToRecordTranscripts[$cas] == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
@@ -270,6 +271,8 @@ function process_request($request){
                     array_push($opps,$opp);
                 }
                 else if($createResponse[0]->success && strpos($sObject->fields['Name'], 'Application') !== false){
+                    var_dump("sObject->fields['ParentId']");
+                    var_dump($sObject->fields['ParentId']);
                     $fieldsToUpdate = array(
                         'CAS_Application_Uploaded__c' => 'true'
                     );
