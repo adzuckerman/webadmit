@@ -262,7 +262,6 @@ function process_request($request){
             }
         }
     }
-    //Create attachments and update Opportunities
     echo '<b>Creatted Attachments for Salesforce:</b><br/>';
     // foreach ($sObjects as $attachment) {
     //     echo "178";
