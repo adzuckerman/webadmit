@@ -31,10 +31,8 @@ function process_request($request){
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
         $extract_path = "/myzips/" . $pdfName . $dateTimeIndex . '/';
-        echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
-        echo "zip to download";
-        var_dump($zip_download);
+
         // Set some options
         $key = 'f148bd717568fe2b2c8fbeec44c44b91';
         $curl = curl_init();
@@ -47,39 +45,17 @@ function process_request($request){
         $content = curl_exec($curl);
         echo " CONTENT  ";
         if($content == " "){
-            echo "IN THE IF ==== ";
-            $key = 'f148bd717568fe2b2c8fbeec44c44b91';
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org'.$zip_download);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-            // Send the request
-            $content = curl_exec($curl);
+            die('Zip had no content');
         }
-        echo " zip_download  ";
-        var_dump($zip_download);
         // Close request to clear up some resources
         curl_close($curl);
-        echo "FP";
-        var_dump($fp);
-        echo "FWRITE :";
-        echo fwrite($fp, $content);
-        echo "FWRITE !";
+        fwrite($fp, $content);
         fclose($fp);
-        echo "File exists ? ";
-        var_dump(file_exists($output_filename));
-        echo " File size? ";
-        var_dump(filesize($output_filename));
+
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
-        echo "output_filename";
-        echo $output_filename;
-        echo "RESPONSE ZIP OPEN";
-        var_dump($res);
-        echo "RESPONSE ZIP ABOVE";
+
         if ($res === TRUE) {
           echo "response is true";
           $zip->extractTo(dirname(__FILE__).$extract_path);
@@ -150,7 +126,6 @@ function process_request($request){
                 $sObject = new stdClass();
                 $sObject->fields = $createFields;
                 $sObject->type = 'Attachment';
-                array_push($sObjects,$sObject);
 
                 //HERE
                 $createResponse = $mySforceConnection->create(array($sObject));
@@ -174,8 +149,7 @@ function process_request($request){
                     $opp = new stdClass();
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
-                    $opp->Id = $sObject->fields['ParentId'];
-
+                    $opp->Id = $attachment->fields['ParentId'];
                     array_push($opps,$opp);
                 }
 
@@ -188,11 +162,9 @@ function process_request($request){
             }
         }
     }
-    echo "148";
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
-        echo "Transcripts 154";
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 155";
             var_dump($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c);
@@ -210,7 +182,6 @@ function process_request($request){
                 $sObject = new stdClass();
                 $sObject->fields = $createFields;
                 $sObject->type = 'Attachment';
-                array_push($sObjects,$sObject);
 
                 //HERE
 
@@ -225,12 +196,9 @@ function process_request($request){
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
                     $opp->Id = $sObject->fields['ParentId'];
-
                     array_push($opps,$opp);
                 }
                 else if($createResponse[0]->success && strpos($sObject->fields['Name'], 'Application') !== false){
-                    var_dump("sObject->fields['ParentId']");
-                    var_dump($sObject->fields['ParentId']);
                     $fieldsToUpdate = array(
                         'CAS_Application_Uploaded__c' => 'true'
                     );
@@ -238,7 +206,6 @@ function process_request($request){
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
                     $opp->Id = $sObject->fields['ParentId'];
-
                     array_push($opps,$opp);
                 }
                 print_r($createResponse);
@@ -255,45 +222,7 @@ function process_request($request){
             }
         }
     }
-    var_dump($pdfName);
-    echo "PDF NAME";
-    //Create attachments and update Opportunities
-    echo '<b>Creating Attachments for Salesforce:</b><br/>';
-    echo count($sObjects);
-    foreach ($sObjects as $attachment) {
-        echo "178";
-        $createResponse = $mySforceConnection->create(array($attachment));
-        //Get ready to update Opportunity records based on successful response
-        if ($createResponse[0]->success && strpos($attachment->fields['Name'], 'Transcript') !== false){
-            $fieldsToUpdate = array(
-                'CAS_Transcript_Uploaded__c' => 'true'
-            );
-            $opp = new stdClass();
-            $opp->fields = $fieldsToUpdate;
-            $opp->type = 'Opportunity';
-            $opp->Id = $attachment->fields['ParentId'];
-            array_push($opps,$opp);
-        }
-        else if($createResponse[0]->success && strpos($attachment->fields['Name'], 'Application') !== false){
-            $fieldsToUpdate = array(
-                'CAS_Application_Uploaded__c' => 'true'
-            );
-            $opp = new stdClass();
-            $opp->fields = $fieldsToUpdate;
-            $opp->type = 'Opportunity';
-            $opp->Id = $attachment->fields['ParentId'];
-            array_push($opps,$opp);
-        }
-        print_r($createResponse);
-        echo '<br/><br/>';
-        //Update Opportunity records
-        echo '<b>Updating Opportunities:</b><br/>';
-        $updateOppResponse = $mySforceConnection->update($opps);
-        foreach($updateOppResponse as $myOpp) {
-            print_r($myOpp);
-            echo '<br/>';
-        }
-    }
+    echo '<b>Created Attachments for Salesforce:</b><br/>';
     return true;
 }
 echo "HERE";
