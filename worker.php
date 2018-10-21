@@ -1,50 +1,40 @@
 <?php
 ini_set('memory_limit', '-1');
 $key = 'f148bd717568fe2b2c8fbeec44c44b91';
-$userId = '280465';
-
 //Functions in this file can run for a long time!
 //This was tested for up to 5 minutes of runtime
-
 function process_request($request){
-
-
     //Create connection to Salesforce.com instance
     define("USERNAME", "azuckermanre@usa.edu.redev");
     define("PASSWORD", "OmnivoFall2018!");
     define("SECURITY_TOKEN", "33u454gypb0g8K0bgm33s45W");
-
     require_once ('soapclient/SforcePartnerClient.php');
-
     $mySforceConnection = new SforcePartnerClient();
     $mySforceConnection->createConnection("soapclient/partner_sandbox.wsdl.xml");
     $mySforceConnection->login(USERNAME, PASSWORD.SECURITY_TOKEN);
-
     $casIds = array();
-
+    $docIds = array();
     //Initialize arrays for Applications
     $casIdtoFile = array();
     $casIdtoEncodedFile = array();
-
     //Initialize arrays for Transcripts
     $casIdDocIdtoFile = array();
     $casIdDocIdtoEncodedFile = array();
     $documentIdToCasId = array();
-
     $pdfName = $request["pdf_manager_batch"]["pdf_manager_template"]["name"];
-
     //Loop through download hrefs and get file
     $i = 1;
-
-
+    var_dump($request["pdf_manager_batch"]["download_hrefs"]);
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
+        echo "Line 43";
         // Get cURL resource
-
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
-        $extract_path = "/myzips/" . $dateTimeIndex . '/';
+        $extract_path = "/myzips/" . $pdfName . $dateTimeIndex . '/';
+        echo "output_filename -> ". $output_filename;
         $fp = fopen($output_filename, 'w');
-
+        echo "zip to download";
+        var_dump($zip_download);
         // Set some options
         $key = 'f148bd717568fe2b2c8fbeec44c44b91';
         $curl = curl_init();
@@ -53,11 +43,11 @@ function process_request($request){
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-
         // Send the request
         $content = curl_exec($curl);
-
+        echo " CONTENT  ";
         if($content == " "){
+            echo "IN THE IF ==== ";
             $key = 'f148bd717568fe2b2c8fbeec44c44b91';
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org'.$zip_download);
@@ -65,36 +55,47 @@ function process_request($request){
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-
             // Send the request
             $content = curl_exec($curl);
         }
+        echo " zip_download  ";
+        var_dump($zip_download);
         // Close request to clear up some resources
         curl_close($curl);
-        fwrite($fp, $content);
+        echo "FP";
+        var_dump($fp);
+        echo "FWRITE :";
+        echo fwrite($fp, $content);
+        echo "FWRITE !";
         fclose($fp);
-
+        echo "File exists ? ";
+        var_dump(file_exists($output_filename));
+        echo " File size? ";
+        var_dump(filesize($output_filename));
         //unzip file
         $zip = new ZipArchive;
         $res = $zip->open($output_filename);
+        echo "output_filename";
+        echo $output_filename;
+        echo "RESPONSE ZIP OPEN";
+        var_dump($res);
+        echo "RESPONSE ZIP ABOVE";
         if ($res === TRUE) {
+          echo "response is true";
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
         }else {
             die('Extraction failed. Please specify a valid zipfile.');
         }
-
         //Iterate through extracted files in the extract path
         $dir = dirname(__FILE__).$extract_path.'*';
         $dirNoStar = str_replace('*','',$dir);
-
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
             echo "line 82";
             $fileOnly = str_replace($dirNoStar,'',$file);
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
-
             if(strpos($pdfName, 'Full_Application') !== false) {
                 $casIdtoFile[$casId] = $file;
                 $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
@@ -106,32 +107,39 @@ function process_request($request){
                 $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
                 $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
+                array_push($docIds,$documentId);
             }
             else {
                 die('There was an unexpected PDF name.');
             }
         }
-
         //Create CAS Id set for query string
         $casIdsCommaSeperated = implode("','",$casIds);
-
         $i++;
     }
-
     //Execute Opportunity query to get Salesforce Id and CAS Id
     $query = "SELECT Id, Name, CAS_ID__c, CAS_Transcript_Uploaded__c, CAS_Application_Uploaded__c from Opportunity WHERE CAS_ID__c IN ('".$casIdsCommaSeperated."')";
     $response = $mySforceConnection->query($query);
     $sObjects = array();
     $opps = array();
-
+    //Create map of CAS Ids to Salesforce records
+    $casIdDocIdToRecord = array();
+    foreach ($response as $record) {
+        foreach ($docIds as $docId){
+            $casIdDocIdToRecord[$record->fields->CAS_ID__c.'~'. $docId] = $record;
+        }
+    }
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
+    echo '<b>Processing the following files:</b><br/>';
+    print_r($response);
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
-            if($record->CAS_Application_Uploaded__c == 'false'){
+            var_dump($record->fields->CAS_Application_Uploaded__c);
+            if($record->fields->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
+                echo $filename . '<br/>';
                 $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
-
                 //The target Attachment Sobject
                 $createFields = array(
                     'Body' => $data,
@@ -142,9 +150,9 @@ function process_request($request){
                 $sObject = new stdClass();
                 $sObject->fields = $createFields;
                 $sObject->type = 'Attachment';
+                array_push($sObjects,$sObject);
 
-                // array_push($sObjects,$sObject);
-                //START
+                //HERE
                 $createResponse = $mySforceConnection->create(array($sObject));
 
                 //Get ready to update Opportunity records based on successful response
@@ -176,47 +184,36 @@ function process_request($request){
                 foreach($updateOppResponse as $myOpp) {
                 }
                 //END
+
             }
         }
     }
-
     echo "148";
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
-
-        //Create map of CAS Ids to Salesforce records
-        $casIdToRecord = array();
-        $casIdToRecordTranscripts = array();
-
-        foreach ($response as $record) {
-            $casIdToRecord[$record->fields->CAS_ID__c] = $record;
-            $casIdToRecordTranscripts[$record->fields->CAS_ID__c] = $record->fields->CAS_Transcript_Uploaded__c ;
-            echo "CAS ID  ".$record->fields->CAS_ID__c. " TRANSCRIPT 226 nreigsdna ". $record->fields->CAS_Transcript_Uploaded__c;
-        }
+        echo "Transcripts 154";
         foreach ($documentIdToCasId as $doc => $cas) {
-            // if($casIdtoRecord[$cas]->fields->CAS_Transcript_Uploaded__c == 'false'){
-            if($casIdToRecordTranscripts[$cas] == 'false'){
+            echo "In foreach 155";
+            var_dump($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c);
+            if($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
                 $data = $casIdDocIdtoEncodedFile[$cas.'~'.$doc];
-
                 // the target Sobject
                 $createFields = array(
                     'Body' => $data,
                     'Name' => $filename,
-                    'ParentId' => $casIdtoRecord[$cas]->Id,
+                    'ParentId' => $casIdDocIdToRecord[$cas.'~'.$doc]->Id,
                     'isPrivate' => 'false'
                 );
                 $sObject = new stdClass();
                 $sObject->fields = $createFields;
                 $sObject->type = 'Attachment';
+                array_push($sObjects,$sObject);
 
-                // array_push($sObjects,$sObject);
+                //HERE
 
-
-                //START
-                echo "255";
                 $createResponse = $mySforceConnection->create(array($sObject));
 
                 //Get ready to update Opportunity records based on successful response
@@ -255,80 +252,65 @@ function process_request($request){
                     echo '<br/>';
                 }
 
-
-                //END
-
-
             }
         }
     }
-    echo '<b>Creatted Attachments for Salesforce:</b><br/>';
-    // foreach ($sObjects as $attachment) {
-    
-    //     echo "178";
-    //     $createResponse = $mySforceConnection->create(array($attachment));
-    //
-    //     //Get ready to update Opportunity records based on successful response
-    //     if ($createResponse[0]->success && strpos($attachment->fields['Name'], 'Transcript') !== false){
-    //         $fieldsToUpdate = array(
-    //             'CAS_Transcript_Uploaded__c' => 'true'
-    //         );
-    //         $opp = new stdClass();
-    //         $opp->fields = $fieldsToUpdate;
-    //         $opp->type = 'Opportunity';
-    //         $opp->Id = $attachment->fields['ParentId'];
-    //
-    //         array_push($opps,$opp);
-    //     }
-    //     else if($createResponse[0]->success && strpos($attachment->fields['Name'], 'Application') !== false){
-    //         $fieldsToUpdate = array(
-    //             'CAS_Application_Uploaded__c' => 'true'
-    //         );
-    //         $opp = new stdClass();
-    //         $opp->fields = $fieldsToUpdate;
-    //         $opp->type = 'Opportunity';
-    //         $opp->Id = $attachment->fields['ParentId'];
-    //
-    //         array_push($opps,$opp);
-    //     }
-    //     print_r($createResponse);
-    //     echo '<br/><br/>';
-    //
-    //     //Update Opportunity records
-    //     echo '<b>Updating Opportunities:</b><br/>';
-    //     $updateOppResponse = $mySforceConnection->update($opps);
-    //     foreach($updateOppResponse as $myOpp) {
-    //         print_r($myOpp);
-    //         echo '<br/>';
-    //     }
-    // }
-
+    var_dump($pdfName);
+    echo "PDF NAME";
+    //Create attachments and update Opportunities
+    echo '<b>Creating Attachments for Salesforce:</b><br/>';
+    echo count($sObjects);
+    foreach ($sObjects as $attachment) {
+        echo "178";
+        $createResponse = $mySforceConnection->create(array($attachment));
+        //Get ready to update Opportunity records based on successful response
+        if ($createResponse[0]->success && strpos($attachment->fields['Name'], 'Transcript') !== false){
+            $fieldsToUpdate = array(
+                'CAS_Transcript_Uploaded__c' => 'true'
+            );
+            $opp = new stdClass();
+            $opp->fields = $fieldsToUpdate;
+            $opp->type = 'Opportunity';
+            $opp->Id = $attachment->fields['ParentId'];
+            array_push($opps,$opp);
+        }
+        else if($createResponse[0]->success && strpos($attachment->fields['Name'], 'Application') !== false){
+            $fieldsToUpdate = array(
+                'CAS_Application_Uploaded__c' => 'true'
+            );
+            $opp = new stdClass();
+            $opp->fields = $fieldsToUpdate;
+            $opp->type = 'Opportunity';
+            $opp->Id = $attachment->fields['ParentId'];
+            array_push($opps,$opp);
+        }
+        print_r($createResponse);
+        echo '<br/><br/>';
+        //Update Opportunity records
+        echo '<b>Updating Opportunities:</b><br/>';
+        $updateOppResponse = $mySforceConnection->update($opps);
+        foreach($updateOppResponse as $myOpp) {
+            print_r($myOpp);
+            echo '<br/>';
+        }
+    }
     return true;
 }
-
 echo "HERE";
-
-
 require 'vendor/autoload.php';
 define('AMQP_DEBUG', true);
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 $url = parse_url(getenv('CLOUDAMQP_URL'));
-
 while(true){
     try{
         $conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], substr($url['path'], 1));
-
         $ch = $conn->channel();
-
         $exchange = 'amq.direct';
         $queue = 'basic_get_queue';
         $ch->queue_declare($queue, false, true, false, false);
         $ch->exchange_declare($exchange, 'direct', true, true, false);
         $ch->queue_bind($queue, $exchange);
-
-
-
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
         if($retrived_msg->body){
@@ -346,11 +328,9 @@ while(true){
             error_log($retrived_msg);
             print_r($retrived_msg);
         }
-
         while (count($ch->callbacks)) {
             $channel->wait();
         }
-
         $ch->close();
         $conn->close();
     } catch(AMQPIOException $e) {
@@ -360,7 +340,6 @@ while(true){
     } catch(\RuntimeException $e) {
         // cleanup_connection($conn);
         echo "RuntimeException";
-
         usleep(60000000);
     } catch(\ErrorException $e) {
         // cleanup_connection($conn);
