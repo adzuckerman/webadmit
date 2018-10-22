@@ -250,8 +250,9 @@ while(true){
                 $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
                 echo "GOOD";
             }else{
-                //there was an error processing the request
+                echo "there was an error processing the request";
                 error_log($retrived_msg->body);
+                $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']); // remove for queue after adding to backup
 
                 $backup_ch = $conn->channel();
 
@@ -263,7 +264,6 @@ while(true){
 
                 $msg = new AMQPMessage($retrived_msg->body, array('content_type' => 'text/plain', 'delivery_mode' => 2));
                 $backup_ch->basic_publish($msg, $exchange);
-                $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']); // remove for queue after adding to backup
 
                 $backup_ch->close();
             }
