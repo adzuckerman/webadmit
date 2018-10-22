@@ -104,7 +104,7 @@ function process_request($request){
     }
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
-
+    echo "LINE 107 LINE";
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
             if($record->fields->CAS_Application_Uploaded__c == 'false'){
@@ -152,6 +152,7 @@ function process_request($request){
             }
         }
     }
+    echo "LINE 155 LINE";
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
