@@ -252,6 +252,7 @@ while(true){
             }else{
                 echo "there was an error processing the request";
                 error_log($retrived_msg->body);
+                echo $retrived_msg->delivery_info['delivery_tag'];
                 $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']); // remove for queue after adding to backup
 
                 $backup_ch = $conn->channel();
