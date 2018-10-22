@@ -4,6 +4,9 @@ $key = 'f148bd717568fe2b2c8fbeec44c44b91';
 //Functions in this file can run for a long time!
 //This was tested for up to 5 minutes of runtime
 function process_request($request){
+    echo "Startin to process";
+
+    echo $request;
     //Create connection to Salesforce.com instance
     define("USERNAME", "azuckermanre@usa.edu.redev");
     define("PASSWORD", "OmnivoFall2018!");
@@ -24,7 +27,7 @@ function process_request($request){
     $pdfName = $request["pdf_manager_batch"]["pdf_manager_template"]["name"];
     //Loop through download hrefs and get file
     $i = 1;
-
+    echo "PDF -> " . $pdfName;
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
         // Get cURL resource
         $dateTimeIndex = date('YmdHis'). '_' . $i;
@@ -66,15 +69,18 @@ function process_request($request){
         $dirNoStar = str_replace('*','',$dir);
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
+            echo " $ file";
             $fileOnly = str_replace($dirNoStar,'',$file);
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
             if(strpos($pdfName, 'Full_Application') !== false) {
+                echo "FILE IS Full_Application ";
                 $casIdtoFile[$casId] = $file;
                 $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
             }
             else if (strpos($pdfName, 'Transcripts') !== false) {
+                echo "FILE IS Transcripts";
                 $documentId = $fileParts[1];
                 $documentIdToCasId[$documentId] = $casId;
                 $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
