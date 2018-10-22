@@ -24,9 +24,8 @@ function process_request($request){
     $pdfName = $request["pdf_manager_batch"]["pdf_manager_template"]["name"];
     //Loop through download hrefs and get file
     $i = 1;
-    var_dump($request["pdf_manager_batch"]["download_hrefs"]);
+
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
-        echo "Line 43";
         // Get cURL resource
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
@@ -43,9 +42,9 @@ function process_request($request){
         curl_setopt($curl, CURLOPT_AUTOREFERER, true);
         // Send the request
         $content = curl_exec($curl);
-        echo " CONTENT  ";
+
         if($content == " "){
-            die('Zip had no content');
+            return 0;
         }
         // Close request to clear up some resources
         curl_close($curl);
@@ -57,18 +56,16 @@ function process_request($request){
         $res = $zip->open($output_filename);
 
         if ($res === TRUE) {
-          echo "response is true";
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
         }else {
-            die('Extraction failed. Please specify a valid zipfile.');
+            return 0;
         }
         //Iterate through extracted files in the extract path
         $dir = dirname(__FILE__).$extract_path.'*';
         $dirNoStar = str_replace('*','',$dir);
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
-            echo "line 82";
             $fileOnly = str_replace($dirNoStar,'',$file);
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
@@ -86,7 +83,7 @@ function process_request($request){
                 array_push($docIds,$documentId);
             }
             else {
-                die('There was an unexpected PDF name.');
+                return 0;
             }
         }
         //Create CAS Id set for query string
@@ -107,14 +104,11 @@ function process_request($request){
     }
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
-    echo '<b>Processing the following files:</b><br/>';
-    print_r($response);
+
     if(strpos($pdfName, 'Full_Application') !== false) {
         foreach ($response as $record) {
-            var_dump($record->fields->CAS_Application_Uploaded__c);
             if($record->fields->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
-                echo $filename . '<br/>';
                 $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
                 //The target Attachment Sobject
                 $createFields = array(
@@ -153,11 +147,7 @@ function process_request($request){
                     array_push($opps,$opp);
                 }
 
-                //Update Opportunity records
                 $updateOppResponse = $mySforceConnection->update($opps);
-                foreach($updateOppResponse as $myOpp) {
-                }
-                //END
 
             }
         }
@@ -243,14 +233,27 @@ while(true){
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
         if($retrived_msg->body){
-            var_dump("MESSAGE");
-            echo "</br></br>";
             if(process_request(json_decode($retrived_msg->body, true))){
+                //request processesed
                 $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
                 echo "GOOD";
             }else{
-                echo "ERROR";
+                //there was an error processing the request
                 error_log($retrived_msg->body);
+
+                $backup_ch = $conn->channel();
+
+                $backup_exchange = 'amq.direct';
+                $backup_queue = 'backup_queue';
+                $backup_ch->queue_declare($backup_queue, false, true, false, false);
+                $backup_ch->exchange_declare($backup_exchange, 'direct', true, true, false);
+                $backup_ch->queue_bind($backup_queue, $backup_exchange);
+
+                $msg = new AMQPMessage($retrived_msg->body, array('content_type' => 'text/plain', 'delivery_mode' => 2));
+                $backup_ch->basic_publish($msg, $exchange);
+                $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']); // remove for queue after adding to backup
+
+                $backup_ch->close();
             }
         }else{
             echo "ERROR";
