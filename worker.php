@@ -29,6 +29,8 @@ function process_request($request){
     $i = 1;
     echo "PDF -> " . $pdfName;
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
+        echo "HERE 32";
+        var_dump($zip_download);
         // Get cURL resource
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
@@ -47,6 +49,7 @@ function process_request($request){
         $content = curl_exec($curl);
 
         if($content == " "){
+            echo "No content";
             return 0;
         }
         // Close request to clear up some resources
@@ -59,9 +62,11 @@ function process_request($request){
         $res = $zip->open($output_filename);
 
         if ($res === TRUE) {
+            echo "just unzipped";
           $zip->extractTo(dirname(__FILE__).$extract_path);
           $zip->close();
         }else {
+            echo "issue with unzipping";
             return 0;
         }
         //Iterate through extracted files in the extract path
