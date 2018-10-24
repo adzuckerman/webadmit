@@ -1,6 +1,6 @@
 <?php
 ini_set('memory_limit', '-1');
-$key = 'f148bd717568fe2b2c8fbeec44c44b91';
+$key = getenv('WEBADMIT_APIKEY'); 
 //Functions in this file can run for a long time!
 //This was tested for up to 5 minutes of runtime
 function process_request($request){
@@ -8,9 +8,9 @@ function process_request($request){
 
     echo $request;
     //Create connection to Salesforce.com instance
-    define("USERNAME", "azuckermanre@usa.edu.redev");
-    define("PASSWORD", "OmnivoFall2018!");
-    define("SECURITY_TOKEN", "33u454gypb0g8K0bgm33s45W");
+    define("USERNAME", getenv('SF_USERNAME'));
+    define("PASSWORD", getenv('SF_PASSWORD'));
+    define("SECURITY_TOKEN", getenv('SF_SECURITY_TOKEN'));
     require_once ('soapclient/SforcePartnerClient.php');
     $mySforceConnection = new SforcePartnerClient();
     $mySforceConnection->createConnection("soapclient/partner_sandbox.wsdl.xml");
@@ -38,7 +38,7 @@ function process_request($request){
         $fp = fopen($output_filename, 'w');
 
         // Set some options
-        $key = 'f148bd717568fe2b2c8fbeec44c44b91';
+        $key = getenv('WEBADMIT_APIKEY');
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, 'https://api.webadmit.org'.$zip_download);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('x-api-key:' . $key));
