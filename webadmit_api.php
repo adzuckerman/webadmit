@@ -3,7 +3,7 @@
 ini_set('memory_limit', '-1');
 //$userIds = array('280465','280464');
 $userIds = array();
-for ($i = 1; $i <= getenv('NO_CAS_USERS'); $i++) {
+for ($i = 1; $i <= intval(getenv('NO_CAS_USERS')); $i++) {
     array_push($userIds, getenv('USER_ID_' . $i));
 } 
 
