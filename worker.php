@@ -75,9 +75,11 @@ function process_request($request){
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
             echo " $ file";
+            var_dump($file);
             $fileOnly = str_replace($dirNoStar,'',$file);
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
+            echo "| CAS ID ". $casId . " | ";
             if(strpos($pdfName, 'Full_Application') !== false) {
                 echo "FILE IS Full_Application ";
                 $casIdtoFile[$casId] = $file;
