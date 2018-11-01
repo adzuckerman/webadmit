@@ -97,7 +97,7 @@ function process_request($request){
             if(strpos($pdfName, 'Full_Application') !== false) {
                 echo "FILE IS Full_Application ";
                 $casIdtoFile[$casId] = $file;
-                $casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
+                //$casIdtoEncodedFile[$casId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
             }
             else if (strpos($pdfName, 'Transcripts') !== false) {
@@ -105,7 +105,7 @@ function process_request($request){
                 $documentId = $fileParts[1];
                 $documentIdToCasId[$documentId] = $casId;
                 $casIdDocIdtoFile[$casId.'~'.$documentId] = $file;
-                $casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
+                //$casIdDocIdtoEncodedFile[$casId.'~'.$documentId] = base64_encode(file_get_contents($file));
                 array_push($casIds,$casId);
                 array_push($docIds,$documentId);
             }
@@ -145,7 +145,7 @@ function process_request($request){
             if($record->fields->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
                 echo $filename . '<br/>';
-                $data = $casIdtoEncodedFile[$record->fields->CAS_ID__c];
+                $data = base64_encode(file_get_contents($casIdtoFile[$record->fields->CAS_ID__c]));//$casIdtoEncodedFile[$record->fields->CAS_ID__c];
                 //The target Attachment Sobject
                 $createFields = array(
                     'Body' => $data,
@@ -214,7 +214,7 @@ function process_request($request){
             if($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
-                $data = $casIdDocIdtoEncodedFile[$cas.'~'.$doc];
+                $data = base64_encode(file_get_contents($casIdDocIdtoFile[$cas.'~'.$doc]));//$casIdDocIdtoEncodedFile[$cas.'~'.$doc];
                 // the target Sobject
                 $createFields = array(
                     'Body' => $data,
