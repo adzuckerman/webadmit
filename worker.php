@@ -227,7 +227,7 @@ function process_request($request){
 
                 //HERE
 
-                $createResponse = $mySforceConnection->create(array($transcript);
+                $createResponse = $mySforceConnection->create(array($transcript));
 
                 //Get ready to update Opportunity records based on successful response
                 if ($createResponse[0]->success) { //&& strpos($sObject->fields['Name'], 'Transcript') !== false){
