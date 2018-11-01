@@ -153,12 +153,12 @@ function process_request($request){
                     'ParentId' => $record->Id,
                     'isPrivate' => 'false'
                 );
-                $sObject = new stdClass();
-                $sObject->fields = $createFields;
-                $sObject->type = 'Attachment';
+                $app = new stdClass();
+                $app->fields = $createFields;
+                $app->type = 'Attachment';
 
                 //HERE
-                $createResponse = $mySforceConnection->create(array($sObject));
+                $createResponse = $mySforceConnection->create(array($app));
 
                 //Get ready to update Opportunity records based on successful response
                 /*if ($createResponse[0]->success && strpos($sObject->fields['Name'], 'Transcript') !== false){
@@ -179,7 +179,7 @@ function process_request($request){
                     $opp = new stdClass();
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
-                    $opp->Id = $attachment->fields['ParentId'];
+                    $opp->Id = $app->fields['ParentId'];
                     
                     if(!in_array($opp->Id,$oppIds)){
                         array_push($opps,$opp);
@@ -192,14 +192,13 @@ function process_request($request){
                 
                 print_r($createResponse);
                 echo '<br/><br/>';
-                
-                echo '<b>Updating Opportunities:</b><br/>';
-                $updateOppAppResponse = $mySforceConnection->update($opps);
-                foreach($updateOppAppResponse as $myAppOpp) {
-                    print_r($myAppOpp);
-                    echo '<br/>';
-                }
             }
+        }
+        echo '<b>Updating Application Opportunities:</b><br/>';
+        $updateOppAppResponse = $mySforceConnection->update($opps);
+        foreach($updateOppAppResponse as $myAppOpp) {
+            print_r($myAppOpp);
+            echo '<br/>';
         }
     }
     echo "LINE 205 LINE";
@@ -215,20 +214,20 @@ function process_request($request){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 echo $filename . '<br/>';
                 $data = base64_encode(file_get_contents($casIdDocIdtoFile[$cas.'~'.$doc]));//$casIdDocIdtoEncodedFile[$cas.'~'.$doc];
-                // the target Sobject
+                // the target transcript Sobject
                 $createFields = array(
                     'Body' => $data,
                     'Name' => $filename,
                     'ParentId' => $casIdDocIdToRecord[$cas.'~'.$doc]->Id,
                     'isPrivate' => 'false'
                 );
-                $sObject = new stdClass();
-                $sObject->fields = $createFields;
-                $sObject->type = 'Attachment';
+                $transcript = new stdClass();
+                $transcript->fields = $createFields;
+                $transcript->type = 'Attachment';
 
                 //HERE
 
-                $createResponse = $mySforceConnection->create(array($sObject));
+                $createResponse = $mySforceConnection->create(array($transcript);
 
                 //Get ready to update Opportunity records based on successful response
                 if ($createResponse[0]->success) { //&& strpos($sObject->fields['Name'], 'Transcript') !== false){
@@ -238,7 +237,7 @@ function process_request($request){
                     $opp = new stdClass();
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
-                    $opp->Id = $sObject->fields['ParentId'];
+                    $opp->Id = $transcript->fields['ParentId'];
                     
                     if(!in_array($opp->Id,$oppIds)){
                         array_push($opps,$opp);
@@ -260,16 +259,15 @@ function process_request($request){
                 }*/
                 print_r($createResponse);
                 echo '<br/><br/>';
-
-                //Update Opportunity records
-                echo '<b>Updating Opportunities:</b><br/>';
-                $updateOppTransResponse = $mySforceConnection->update($opps);
-                foreach($updateOppTransResponse as $myTransOpp) {
-                    print_r($myTransOpp);
-                    echo '<br/>';
-                }
             }
         }
+        //Update Opportunity records
+        echo '<b>Updating Transcript Opportunities:</b><br/>';
+        $updateOppTransResponse = $mySforceConnection->update($opps);
+        foreach($updateOppTransResponse as $myTransOpp) {
+            print_r($myTransOpp);
+            echo '<br/>';
+        }                                                      
     }
     echo '<b>Created Attachments and Updated Opportunities in Salesforce</b><br/>';
     return true;
