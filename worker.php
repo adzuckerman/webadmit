@@ -17,7 +17,7 @@ function process_request($request){
     
     require_once ('soapclient/SforcePartnerClient.php');
     $mySforceConnection = new SforcePartnerClient();
-    $mySforceConnection->createConnection("soapclient/partner_sandbox.wsdl.xml");
+    $mySforceConnection->createConnection(getenv('PARTNER_WSDL_PATH'));
     $mySforceConnection->login(USERNAME, PASSWORD.SECURITY_TOKEN);
     
     $casIds = array();
