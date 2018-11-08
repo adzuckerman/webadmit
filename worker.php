@@ -122,6 +122,8 @@ function process_request($request){
     //Execute Opportunity query to get Salesforce Id and CAS Id
     $query = "SELECT Id, Name, CAS_ID__c, CAS_Transcript_Uploaded__c, CAS_Application_Uploaded__c from Opportunity WHERE CAS_ID__c IN ('".$casIdsCommaSeperated."')";
     $response = $mySforceConnection->query($query);
+    var_dump($response);
+    
     $sObjects = array();
     $opps = array();
     $oppIds = array();
