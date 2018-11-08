@@ -122,7 +122,7 @@ function process_request($request){
     //Execute Opportunity query to get Salesforce Id and CAS Id
     $query = "SELECT Id, Name, CAS_ID__c, CAS_Transcript_Uploaded__c, CAS_Application_Uploaded__c from Opportunity WHERE CAS_ID__c IN ('".$casIdsCommaSeperated."')";
     $response = $mySforceConnection->query($query);
-    var_dump($response);
+    //var_dump($response);
     
     $sObjects = array();
     $opps = array();
@@ -146,6 +146,7 @@ function process_request($request){
             
             if($record->fields->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
+                $filename = str_replace('&','&amp;',$filename); //In case we have an & in the filename
                 echo $filename . '<br/>';
                 $data = base64_encode(file_get_contents($casIdtoFile[$record->fields->CAS_ID__c]));//$casIdtoEncodedFile[$record->fields->CAS_ID__c];
                 //The target Attachment Sobject
@@ -214,6 +215,7 @@ function process_request($request){
             
             if($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
+                $filename = str_replace('&','&amp;',$filename); //In case we have an & in the filename
                 echo $filename . '<br/>';
                 $data = base64_encode(file_get_contents($casIdDocIdtoFile[$cas.'~'.$doc]));//$casIdDocIdtoEncodedFile[$cas.'~'.$doc];
                 // the target transcript Sobject
