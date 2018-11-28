@@ -14,7 +14,7 @@ define('AMQP_DEBUG', true);
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-if($request !== NULL){
+if($request !== NULL && ($request["pdf_manager_batch"]["pdf_manager_template"]["name"] == "Full_Application" || $request["pdf_manager_batch"]["pdf_manager_template"]["name"] == "Transcripts")){
     $url = parse_url(getenv('CLOUDAMQP_URL'));
     $conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], substr($url['path'], 1));
     $ch = $conn->channel();
