@@ -270,9 +270,11 @@ function process_request($request){
         $updateOppTransResponse = $mySforceConnection->update($opps);
         echo "dumping updateOppTransResponse";
         var_dump($updateOppTransResponse);
-        foreach($updateOppTransResponse as $myTransOpp) {
-            print_r($myTransOpp);
-            echo '<br/>';
+        if(!is_null($updateOppTransResponse)){
+          foreach($updateOppTransResponse as $myTransOpp) {
+              print_r($myTransOpp);
+              echo '<br/>';
+          }
         }
     }
     echo '<b>Created Attachments and Updated Opportunities in Salesforce</b><br/>';
