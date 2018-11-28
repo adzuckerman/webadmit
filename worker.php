@@ -199,9 +199,11 @@ function process_request($request){
         }
         echo '<b>Updating Application Opportunities:</b><br/>';
         $updateOppAppResponse = $mySforceConnection->update($opps);
-        foreach($updateOppAppResponse as $myAppOpp) {
-            print_r($myAppOpp);
-            echo '<br/>';
+        if(!is_null($updateOppAppResponse)){
+            foreach($updateOppAppResponse as $myAppOpp) {
+                print_r($myAppOpp);
+                echo '<br/>';
+            }
         }
     }
     echo "LINE 205 LINE";
