@@ -9,37 +9,37 @@ $key = getenv('WEBADMIT_APIKEY');
 function process_request($request){
     echo "Starting to process";
     echo $request;
-    
+
     //Create connection to Salesforce.com instance
     define("USERNAME", getenv('SF_USERNAME'));
     define("PASSWORD", getenv('SF_PASSWORD'));
     define("SECURITY_TOKEN", getenv('SF_SECURITY_TOKEN'));
-    
+
     require_once ('soapclient/SforcePartnerClient.php');
     $mySforceConnection = new SforcePartnerClient();
     $mySforceConnection->createConnection(getenv('PARTNER_WSDL_PATH'));
     $mySforceConnection->login(USERNAME, PASSWORD.SECURITY_TOKEN);
-    
+
     $casIds = array();
     $docIds = array();
-    
+
     //Initialize arrays for Applications
     $casIdtoFile = array();
     $casIdtoEncodedFile = array();
-    
+
     //Initialize arrays for Transcripts
     $casIdDocIdtoFile = array();
     $casIdDocIdtoEncodedFile = array();
     $documentIdToCasId = array();
     $pdfName = $request["pdf_manager_batch"]["pdf_manager_template"]["name"];
-    
+
     //Loop through download hrefs and get file
     $i = 1;
     echo "PDF -> " . $pdfName;
     foreach($request["pdf_manager_batch"]["download_hrefs"] as $zip_download){
         echo "HERE 40";
         var_dump($zip_download);
-        
+
         // Get cURL resource
         $dateTimeIndex = date('YmdHis'). '_' . $i;
         $output_filename = $pdfName . $dateTimeIndex . '.zip';
@@ -54,7 +54,7 @@ function process_request($request){
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-        
+
         // Send the request
         $content = curl_exec($curl);
 
@@ -80,11 +80,11 @@ function process_request($request){
             echo "There was an issue with unzipping";
             return 0;
         }
-        
+
         //Iterate through extracted files in the extract path
         $dir = dirname(__FILE__).$extract_path.'*';
         $dirNoStar = str_replace('*','',$dir);
-        
+
       	//Get CAS Id and Document ID if applicable from filename
         foreach(glob($dir) as $file) {
             echo " $ file";
@@ -93,7 +93,7 @@ function process_request($request){
             $fileParts = explode("_",$fileOnly);
             $casId = $fileParts[0];
             echo "| CAS ID ". $casId . " | ";
-            
+
             if(strpos($pdfName, 'Full_Application') !== false) {
                 echo "FILE IS Full_Application ";
                 $casIdtoFile[$casId] = $file;
@@ -113,21 +113,21 @@ function process_request($request){
                 return 0;
             }
         }
-        
+
         //Create CAS Id set for query string
         $casIdsCommaSeperated = implode("','",$casIds);
         $i++;
     }
-    
+
     //Execute Opportunity query to get Salesforce Id and CAS Id
     $query = "SELECT Id, Name, CAS_ID__c, CAS_Transcript_Uploaded__c, CAS_Application_Uploaded__c from Opportunity WHERE CAS_ID__c IN ('".$casIdsCommaSeperated."')";
     $response = $mySforceConnection->query($query);
     //var_dump($response);
-    
+
     $sObjects = array();
     $opps = array();
     $oppIds = array();
-    
+
     //Create map of CAS Ids to Salesforce records
     $casIdDocIdToRecord = array();
     foreach ($response as $record) {
@@ -135,7 +135,7 @@ function process_request($request){
             $casIdDocIdToRecord[$record->fields->CAS_ID__c.'~'. $docId] = $record;
         }
     }
-    
+
     //If no CAS application has been updloaded iterate through response and create
     //array of application attachment sObjects to be sent to Salesforce.com
     echo "LINE 139 LINE";
@@ -143,7 +143,7 @@ function process_request($request){
         foreach ($response as $record) {
             echo "In foreach 142";
             var_dump($record->fields->CAS_Application_Uploaded__c);
-            
+
             if($record->fields->CAS_Application_Uploaded__c == 'false'){
                 $filename = basename($casIdtoFile[$record->fields->CAS_ID__c]);
                 $filename = str_replace('&','&amp;',$filename); //In case we have an & in the filename
@@ -183,7 +183,7 @@ function process_request($request){
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
                     $opp->Id = $app->fields['ParentId'];
-                    
+
                     if(!in_array($opp->Id,$oppIds)){
                         array_push($opps,$opp);
                         array_push($oppIds, $opp->Id);
@@ -192,7 +192,7 @@ function process_request($request){
                         echo 'This id is already in the array: ' . $opp->Id . '<br/>';
                     }
                 }
-                
+
                 print_r($createResponse);
                 echo '<br/><br/>';
             }
@@ -205,14 +205,14 @@ function process_request($request){
         }
     }
     echo "LINE 205 LINE";
-    
+
     //If no CAS transcript has been updloaded iterate through response and create
     //array of transcript attachment sObjects to be sent to Salesforce.com
     if(strpos($pdfName, 'Transcripts') !== false) {
         foreach ($documentIdToCasId as $doc => $cas) {
             echo "In foreach 211";
             var_dump($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c);
-            
+
             if($casIdDocIdToRecord[$cas.'~'.$doc]->fields->CAS_Transcript_Uploaded__c == 'false'){
                 $filename = basename($casIdDocIdtoFile[$cas.'~'.$doc]);
                 $filename = str_replace('&','&amp;',$filename); //In case we have an & in the filename
@@ -242,14 +242,14 @@ function process_request($request){
                     $opp->fields = $fieldsToUpdate;
                     $opp->type = 'Opportunity';
                     $opp->Id = $transcript->fields['ParentId'];
-                    
+
                     if(!in_array($opp->Id,$oppIds)){
                         array_push($opps,$opp);
                         array_push($oppIds, $opp->Id);
                     }
                     else {
                         echo 'This id is already in the array: ' . $opp->Id . '<br/>';
-                    }     
+                    }
                 }
                 /*else if($createResponse[0]->success && strpos($sObject->fields['Name'], 'Application') !== false){
                     $fieldsToUpdate = array(
@@ -268,10 +268,12 @@ function process_request($request){
         //Update Opportunity records
         echo '<b>Updating Transcript Opportunities:</b><br/>';
         $updateOppTransResponse = $mySforceConnection->update($opps);
+        echo "dumping updateOppTransResponse";
+        var_dump($updateOppTransResponse);
         foreach($updateOppTransResponse as $myTransOpp) {
             print_r($myTransOpp);
             echo '<br/>';
-        }                                                      
+        }
     }
     echo '<b>Created Attachments and Updated Opportunities in Salesforce</b><br/>';
     return true;
