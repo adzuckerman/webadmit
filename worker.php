@@ -57,9 +57,11 @@ function process_request($request){
 
         // Send the request
         $content = curl_exec($curl);
+        $log->info("Executed CURL ZIP : ". $zip_download . "  KEY : " . $key);
 
         if($content == " "){
             echo "No content";
+            $log->error('No content');
             return 0;
         }
         // Close request to clear up some resources
@@ -78,6 +80,7 @@ function process_request($request){
         }
         else {
             echo "There was an issue with unzipping";
+            $log->error('There was an issue with unzipping');
             return 0;
         }
 
@@ -110,6 +113,7 @@ function process_request($request){
                 array_push($docIds,$documentId);
             }
             else {
+                $log->warning('PDF NAME NOT RECOGNIZED ' . $pdfName);
                 return 0;
             }
         }
@@ -192,6 +196,7 @@ function process_request($request){
                         echo 'This id is already in the array: ' . $opp->Id . '<br/>';
                     }
                 }
+                $log->info($createResponse);
 
                 print_r($createResponse);
                 echo '<br/><br/>';
@@ -263,6 +268,7 @@ function process_request($request){
                     $opp->Id = $sObject->fields['ParentId'];
                     array_push($opps,$opp);
                 }*/
+                $log->info($createResponse);
                 print_r($createResponse);
                 echo '<br/><br/>';
             }
@@ -280,6 +286,7 @@ function process_request($request){
         }
     }
     echo '<b>Created Attachments and Updated Opportunities in Salesforce</b><br/>';
+    $log->info("Created Attachments and Updated Opportunities in Salesforce");
     return true;
 }
 echo "Starting up";
@@ -307,10 +314,11 @@ while(true){
         var_dump($retrived_msg->body);
 
         // add records to the log
-        $log->warning('Foo');
-        $log->error('Bar');
-        
+        // $log->warning('Foo');
+        // $log->error('Bar');
+
         if($retrived_msg->body){
+          $log->info("Found Message ". $retrived_msg->body);
           echo "In the IF";
           var_dump($retrived_msg->body);
             if(process_request(json_decode($retrived_msg->body, true))){
@@ -338,6 +346,7 @@ while(true){
             }
         }else{
             echo "ERROR";
+            $log->warning('Message has no body' . $retrived_msg);
             error_log($retrived_msg);
             print_r($retrived_msg);
         }
@@ -349,14 +358,17 @@ while(true){
     } catch(AMQPIOException $e) {
         // cleanup_connection($conn);
         echo "AMQPIOException";
+        $log->error('AMQPIOException');
         usleep(60000000);
     } catch(\RuntimeException $e) {
         // cleanup_connection($conn);
         echo "RuntimeException";
+        $log->error('RuntimeException');
         usleep(60000000);
     } catch(\ErrorException $e) {
         // cleanup_connection($conn);
         echo "ErrorException";
+        $log->error('ErrorException');
         var_dump($e);
         usleep(60000000);
     }
