@@ -282,7 +282,7 @@ function process_request($request){
     echo '<b>Created Attachments and Updated Opportunities in Salesforce</b><br/>';
     return true;
 }
-echo "HERE";
+echo "Starting up";
 require 'vendor/autoload.php';
 define('AMQP_DEBUG', true);
 use PhpAmqpLib\Connection\AMQPConnection;
