@@ -287,6 +287,11 @@ require 'vendor/autoload.php';
 define('AMQP_DEBUG', true);
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use Monolog\Logger; //logging to loggly
+use Monolog\Handler\StreamHandler;
+$log = new Logger('webadmit1');
+$log->pushHandler(new StreamHandler('php://stderr', Logger::WARNING));
+
 $url = parse_url(getenv('CLOUDAMQP_URL'));
 while(true){
     try{
@@ -300,6 +305,11 @@ while(true){
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
         var_dump($retrived_msg->body);
+
+        // add records to the log
+        $log->warning('Foo');
+        $log->error('Bar');
+        
         if($retrived_msg->body){
           echo "In the IF";
           var_dump($retrived_msg->body);
