@@ -14,8 +14,7 @@
     },
     "require": {
         "ext-soap": "*",
-        "videlalvaro/php-amqplib": "2.2.*",
-        "ext-bcmath": "*",        
+        "ext-bcmath": "*",
         "php": ">=5.4.0",
         "php-amqplib/php-amqplib": "^2.7",
         "rebangm/silex-guzzlehttp-provider": "^2.0"
