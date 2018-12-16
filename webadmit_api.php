@@ -1,11 +1,16 @@
 <?php
 
 ini_set('memory_limit', '-1');
+use Monolog\Logger; //logging to loggly
+use Monolog\Handler\StreamHandler;
+$log = new Logger('webadmit1');
+$log->pushHandler(new StreamHandler('php://stderr', Logger::WARNING));
+
 //$userIds = array('280465','280464');
 $userIds = array();
 for ($i = 1; $i <= intval(getenv('NO_CAS_USERS')); $i++) {
     array_push($userIds, getenv('USER_ID_' . $i));
-} 
+}
 
 function showTemplates($userId){
     $key = getenv('WEBADMIT_APIKEY');
@@ -56,11 +61,13 @@ function initRun($id,$userId){
     ));
     // Send the request & save response to $resp
     $resp = curl_exec($curl);
+    $log->info("Executed CURL User id ". $userId . "  CURLOPT_POSTFIELDS : " . $data_string . "  CURLOPT_HTTPHEADER : " . $key);
 
     // Close request to clear up some resources
     curl_close($curl);
 
     $result = json_decode($resp, $assoc = true);
+    $log->info($result);
 
     var_dump($result);
 

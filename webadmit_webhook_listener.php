@@ -1,5 +1,9 @@
 <?php
 ini_set('memory_limit', '-1');
+use Monolog\Logger; //logging to loggly
+use Monolog\Handler\StreamHandler;
+$log = new Logger('webadmit1');
+$log->pushHandler(new StreamHandler('php://stderr', Logger::WARNING));
 
 //Get callback from WebAdmit
 $key = 'f148bd717568fe2b2c8fbeec44c44b91';
@@ -14,6 +18,8 @@ define('AMQP_DEBUG', true);
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
+$log->info($request);
+
 if($request !== NULL && ($request["pdf_manager_batch"]["pdf_manager_template"]["name"] == "Full_Application" || $request["pdf_manager_batch"]["pdf_manager_template"]["name"] == "Transcripts")){
     $url = parse_url(getenv('CLOUDAMQP_URL'));
     $conn = new AMQPConnection($url['host'], 5672, $url['user'], $url['pass'], substr($url['path'], 1));
@@ -27,7 +33,7 @@ if($request !== NULL && ($request["pdf_manager_batch"]["pdf_manager_template"]["
 
     $msg = new AMQPMessage(json_encode($request), array('content_type' => 'text/plain', 'delivery_mode' => 2));
     $ch->basic_publish($msg, $exchange);
-
+    $log->info("POSTED MESSAGE ". $request);
 
     $ch->close();
     $conn->close();
@@ -37,6 +43,7 @@ if($request !== NULL && ($request["pdf_manager_batch"]["pdf_manager_template"]["
     error_log($request);
     echo "finish";
 }else{
+    $log->warning("NOTHING to process");
     echo "NOTHING to process";
     exit(1);
 }
