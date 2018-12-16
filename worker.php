@@ -299,7 +299,10 @@ while(true){
         $ch->queue_bind($queue, $exchange);
         $retrived_msg = $ch->basic_get($queue);
         echo "received ". $retrived_msg->body . " </br>";
+        var_dump($retrived_msg->body);
         if($retrived_msg->body){
+          echo "In the IF";
+          var_dump($retrived_msg->body);
             if(process_request(json_decode($retrived_msg->body, true))){
                 //request processesed
                 $ch->basic_ack($retrived_msg->delivery_info['delivery_tag']);
